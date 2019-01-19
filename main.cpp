@@ -7,6 +7,7 @@
 #include "serialport.h"
 #include "solvepnp.h"
 #include "stereo_vision.h"
+#include "v4l2_set.h"
 //#define DEBUG
 FileStorage fs("canshu.yaml",FileStorage::READ);
 int main()
@@ -16,61 +17,53 @@ int main()
 
 /// =======================================chushihua=================================
 
-    // open the camera and local the camera
-    RMVideoCapture cap0("/dev/video1",3);
-    if(cap0.fd!=-1){
-        cap0.setVideoFormat(1280,720,1);
-        cap0.setExposureTime(0, 10);
-        //cap0.setSaturation(100);
-        cap0.startStream();
-        cap0.info();
-    }
-    else{
-        cap0.camnum = -1;
-        cout << "can't open the camera" << endl;
-        return 0;
-    }
 
-    RMVideoCapture cap1("/dev/video2",3);
-    if(cap1.fd!=-1){
-        cap1.setVideoFormat(1280,720,1);
-        cap1.setExposureTime(0,10);
-        //cap1.setSaturation(100);
-        cap1.startStream();
-        cap1.info();
-    }
-    else{
-        cap1.camnum = -1;
-        cout << "can't open the camera" << endl;
+    // open the camera and local the camera
+    int fd1 = open("/dev/video1",O_RDWR);
+    int fd2 = open("/dev/video2",O_RDWR);
+    v4l2_set vs1(fd1),vs2(fd2);
+//    vs1.set_saturation(10);      //饱和度
+    vs1.set_exposure(10);     //曝光
+    int camnum1 = vs1.set_camnum();
+//    vs2.set_saturation(saturaion);      //饱和度
+    vs2.set_exposure(10);     //曝光
+    int camnum2 = vs2.set_camnum();
+    VideoCapture camera1(1),camera2(2);
+    camera1.set(CV_CAP_PROP_FRAME_WIDTH,1280);
+    camera1.set(CV_CAP_PROP_FRAME_HEIGHT,720);
+    camera2.set(CV_CAP_PROP_FRAME_WIDTH,1280);
+    camera2.set(CV_CAP_PROP_FRAME_HEIGHT,720);
+    if (!camera1.isOpened())
+    {
+        cout << "Failed!"<<endl;
         return 0;
     }
-    RMVideoCapture cap_left,cap_right;
+    VideoCapture cap_left,cap_right;
     bool camstatus[2] = {false,false};
-    if(cap0.camnum == 2){
-        cap_left = cap0;
+    if(camnum1 == 2){
+        cap_left = camera1;
         camstatus[0] = true;
     }
-    else if(cap1.camnum == 2){
-        cap_left = cap1;
+    else if(camnum2 == 2){
+        cap_left = camera2;
         camstatus[0] = true;
     }
     else{
         camstatus[0] = false;
     }
 
-    if(cap0.camnum == 3){
-        cap_right = cap0;
+    if(camnum1 == 3){
+        cap_right = camera1;
         camstatus[1] = true;
     }
-    else if(cap1.camnum == 3){
-        cap_right = cap1;
+    else if(camnum2 == 3){
+        cap_right = camera2;
         camstatus[1] = true;
     }
     else{
         camstatus[1] = false;
     }
     cout << "摄像机打开完成" << endl;
-
 
 /// =======================================chushihuawancheng=================================
     if(camstatus[0] && camstatus[1])
@@ -87,7 +80,7 @@ int main()
     {
         cout<<"shexiangtou de shunxu youwu!!"<<endl;
     }
-    cap0.closeStream();
-    cap1.closeStream();
+    camera1.release();
+    camera2.release();
     return 0;
 }

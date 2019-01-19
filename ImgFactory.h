@@ -29,8 +29,8 @@ private:
     list<Mat> R_list_of_frame;
 public:
     ImgFactory();
-    void Left_read(RMVideoCapture &cap);
-    void Right_read(RMVideoCapture &cap);
+    void Left_read(VideoCapture &cap);
+    void Right_read(VideoCapture &cap);
     void Img_handle();
 };
 

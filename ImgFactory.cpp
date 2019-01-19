@@ -16,7 +16,7 @@ ImgFactory::ImgFactory(){
 /**
  * @brief ImgFactory::Left_read  读取zuobianshexiangtou图像的一个线程
  */
-void ImgFactory::Left_read(RMVideoCapture &camera0){
+void ImgFactory::Left_read(VideoCapture &camera0){
     Mat frame;
     while (1)
     {
@@ -40,7 +40,7 @@ void ImgFactory::Left_read(RMVideoCapture &camera0){
 /**
  * @brief ImgFactory::Right_read  读取yuobianshexiangtou图像的一个线程
  */
-void ImgFactory::Right_read(RMVideoCapture &camera){
+void ImgFactory::Right_read(VideoCapture &camera){
     Mat frame;
     while (1)
     {

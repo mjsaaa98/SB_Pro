@@ -279,17 +279,13 @@ bool RMVideoCapture::setExposureTime(bool auto_exp, int t){
         struct v4l2_control control_s;
         control_s.id = V4L2_CID_EXPOSURE_AUTO;
         control_s.value = V4L2_EXPOSURE_MANUAL;
-        if( xioctl(fd, VIDIOC_S_CTRL, &control_s) < 0){
-            printf("Close MANUAL Exposure error\n");
-            return false;
-        }
+        ioctl(fd,VIDIOC_S_CTRL,&control_s);
+
 
         control_s.id = V4L2_CID_EXPOSURE_ABSOLUTE;
         control_s.value = t;
-        if( xioctl(fd, VIDIOC_S_CTRL, &control_s) < 0){
-            printf("Set Exposure Time error\n");
-            return false;
-        }
+        ioctl(fd,VIDIOC_S_CTRL,&control_s);
+        std::cout<<"曝光值:"<<control_s.value<<std::endl;
     }
     return true;
 }

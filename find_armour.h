@@ -11,7 +11,7 @@
 #define SHOWDEBUG
 using namespace cv;
 using namespace std;
-
+extern FileStorage fs;
 /**
  * @brief Sort_RotatedRect  按旋转矩形的中心点x方向降序排列
  * @param r1  RotatedRect
@@ -71,7 +71,6 @@ public:
 private:
     void clear_data();   //切换指令时清空所有数据
     void Clear();   //清空所有数据结构
-    FileStorage fs;
     vector<float> diameters;
     vector<Point2f> armour_center;
     vector<float> big_diameters;

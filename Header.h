@@ -31,6 +31,10 @@ using namespace cv;
 using namespace std;
 
 
+typedef enum{
+    small_armor,
+    big_armor
+}armor_type;
 
 struct InitParams{
     uchar armor_thres_whole;
@@ -53,10 +57,6 @@ typedef struct{
 }AbsPosition;
 
 typedef struct{
-    typedef enum{
-        small_armor,
-        big_armor
-    }armor_type;
     Point armor_center = Point(0,0);
     float distance = 0.0;//mm
     Point2f armor_points[4] = {Point(0,0),Point(0,0),Point(0,0),Point(0,0)};

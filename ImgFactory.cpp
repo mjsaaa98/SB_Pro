@@ -24,7 +24,7 @@ void ImgFactory::Left_read(RMVideoCapture &camera0){
 //        double t1=0,t3 = 0;
 //        t1 = getTickCount();
         camera0 >> frame;
-        if (frame.empty()) break;
+//        if (frame.empty()) break;
 //        imshow("L",frame);
 //        t3 = getTickCount();
 //        int fps_read = (t3-t1)/getTickFrequency()*1000;
@@ -46,7 +46,7 @@ void ImgFactory::Right_read(RMVideoCapture &camera){
     {
         while(R_handle_flag==true);  //可以处理标志位还为真，说明图片还没被传进去处理，一直等待。
         camera >> frame;
-        if (frame.empty()) break;
+//        if (frame.empty()) break;
         imshow("R",frame);
         //加锁,在列表插入值，同时禁止读取
         Lock.lock();
@@ -120,8 +120,8 @@ void ImgFactory::Img_handle(){
                 int small_dis_i;
                 Stereo.get_location(Left_Points,Right_Points,Positions);
                 small_dis_i = A_Predict.Predict(Positions);
-                circle(L_frame,Left_Points[small_dis_i],30,Scalar(0,0,255),1);
-                circle(R_frame,Right_Points[small_dis_i],30,Scalar(0,0,255),1);
+                circle(L_frame,Left_Points[small_dis_i],30,Scalar(0,0,255),10);
+                circle(R_frame,Right_Points[small_dis_i],30,Scalar(0,0,255),10);
 //                putText(L_frame,string(Left_Points[small_dis_i].x),Left_Points[small_dis_i],FONT_HERSHEY_SIMPLEX,3,Scalar(255,255,255));
 //                putText(R_frame,string(Right_Points[small_dis_i].x),Right_Points[small_dis_i],FONT_HERSHEY_SIMPLEX,3,Scalar(255,255,255));
                 cout<<"Left:"<<Left_Points[small_dis_i].x<<endl<<"Right:"<<Right_Points[small_dis_i].x<<endl;
@@ -144,6 +144,7 @@ void ImgFactory::Img_handle(){
             imshow("RIGHT_dst",R_dst);
 
             t3 = getTickCount();
+            cout<<"dis:"<<A_Predict.Result.z<<"m"<<endl;
             cout<<"time:"<<(t3-t1)/getTickFrequency()*1000<<endl;
 #ifdef OPEN_SERIAL
         sp.TransformData(A_Predict.Vision);

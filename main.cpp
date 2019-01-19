@@ -8,7 +8,7 @@
 #include "solvepnp.h"
 #include "stereo_vision.h"
 //#define DEBUG
-
+FileStorage fs("canshu.yaml",FileStorage::READ);
 int main()
 {
     // jiang biaoding canshu xieru wenjian

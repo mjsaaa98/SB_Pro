@@ -5,15 +5,15 @@
  */
 find_armour::find_armour()
 {
-//    fs["y_dist_wucha_ROI"] >> y_dist_wucha_ROI;
-//    fs["height_d_wucha_ROI"] >> height_d_wucha_ROI;
-//    fs["area_min"] >> area_min;
-//    fs["angle1"] >> a1;
-//    fs["angle2"] >> a2;
-//    fs["y_dist_wucha"] >> y_dist_wucha;
-//    fs["height_d_wucha"] >> height_d_wucha;
-//    fs["min_rate"] >> min_rate;
-//    fs["max_rate"] >> max_rate;
+    fs["y_dist_wucha_ROI"] >> y_dist_wucha_ROI;
+    fs["height_d_wucha_ROI"] >> height_d_wucha_ROI;
+    fs["area_min"] >> area_min;
+    fs["angle1"] >> a1;
+    fs["angle2"] >> a2;
+    fs["y_dist_wucha"] >> y_dist_wucha;
+    fs["height_d_wucha"] >> height_d_wucha;
+    fs["min_rate"] >> min_rate;
+    fs["max_rate"] >> max_rate;
     Clear();
     clear_data();
 }
@@ -98,35 +98,56 @@ float find_armour::Point_Angle(const Point2f &p1,const Point2f &p2){
  */
 void find_armour::image_preprocess(int mode,Mat src,Mat &dst)
 {
-    Mat gray;
-    vector <Mat> planne;
-    Mat k = getStructuringElement(MORPH_RECT,Size(11,11));
-    Mat k1 = getStructuringElement(MORPH_RECT,Size(7,7));
+//    Mat gray;
+//    vector <Mat> planne;
+//    Mat k = getStructuringElement(MORPH_RECT,Size(11,11));
+//    Mat k1 = getStructuringElement(MORPH_RECT,Size(7,7));
     if(mode==2)
     {
-        //    蓝色通道减去红色通道
-
-        split(src,planne);
+        Mat gray;
+//        Mat k = getStructuringElement(MORPH_RECT,Size(3,3));
+        Mat k1 = getStructuringElement(MORPH_RECT,Size(7,7));
         cvtColor(src,gray,CV_BGR2GRAY);
-        threshold(gray,gray,50,255,THRESH_BINARY);
-        dilate(gray,gray,k);
+        threshold(gray,gray,110,255,THRESH_BINARY);
+        Mat img_blue;
+        int iLowH, iHighH, iLowS, iHighS, iLowV, iHighV;
 
-        subtract(planne[0],planne[2],dst);
-//        imshow("planne",dst);
+        fs["iLowH"]>>iLowH;
+        fs["iHighH"]>>iHighH;
+        fs["iLowS"]>>iLowS;
+        fs["iHighS"]>>iHighS;
+        fs["iLowV"]>>iLowV;
+        fs["iHighV"]>>iHighV;
 
-        threshold(dst,dst,50,255,THRESH_BINARY);
-        dilate(dst,dst,k);
-//        imshow("planne_a",dst);
+        cvtColor(src, img_blue, COLOR_BGR2HSV);
+    //    vector<Mat> planes;
+    //    split(img_blue,planes);
+    //    planes[2]-=30;
+    //    merge(planes,img_blue);
+        inRange(img_blue, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), dst);
+
+        //open and close operation.
+//        Mat kernel = getStructuringElement(MORPH_RECT, Size(5, 5));
+//        Mat kernel1 = getStructuringElement(MORPH_RECT, Size(3, 3));
+    //    Mat kernel2 = getStructuringElement(MORPH_RECT, Size(11,11));
+
+    //    morphologyEx(dst, dst, MORPH_CLOSE, kernel);
+
+    //    morphologyEx(dst, dst, MORPH_OPEN, kernel1);
+    //    morphologyEx(dst, dst, CV_MOP_OPEN, kernel1);
+        dilate(dst,dst,k1);
+    //    morphologyEx(dst, dst, CV_MOP_CLOSE, kernel1);
+    //        erode(dst,dst,kernel);
         dst = dst&gray;
-//        dilate(dst,dst,k1);
+        dilate(dst,dst,k1);
     }
     else if(mode==1)
     {
 
     }
 //    imshow("hsv",dst);
-    dst = dst&gray;
-    dilate(dst,dst,k1);
+//    dst = dst&gray;
+//    dilate(dst,dst,k1);
     //    Mat gray;
     //    Mat k = getStructuringElement(MORPH_RECT,Size(3,3));
     //    Mat k1 = getStructuringElement(MORPH_RECT,Size(7,7));
@@ -440,111 +461,14 @@ void find_armour::src_get_armor()
     float y_dist,x_dist,min_h,height_d,K,x2h_rate,angle_diff,max_h;
     float angle_of_Rotated,height_of_Rotated;
     if(size==2){
-//        cout<<"contours's 2"<<endl;
-        height1 = contours_para[0][0];
-        x1 = contours_para[0][1];
-        y1 = contours_para[0][2];
-        angle1 = fabs(contours_para[0][3]);
-
-        center_point1 = result_armor[0].center;
-        area1 = result_armor[0].size.height * result_armor[0].size.width;
-
-        result_armor[0].points(_pt);
-         /**
-          * pt
-          * 0 2
-          * 1 3
-        */
-        if(angle1 > 50.0)
-        {
-            pt[0] = _pt[3];
-            pt[1] = _pt[0];
-        }
-        else
-        {
-            pt[0] = _pt[2];
-            pt[1] = _pt[3];
-        }
-
-        height2 = contours_para[1][0];
-        x2 = contours_para[1][1];
-        y2 = contours_para[1][2];
-        angle2 = fabs(contours_para[1][3]);
-
-        center_point2 = result_armor[1].center;
-        area2 = result_armor[1].size.height * result_armor[1].size.width;
-
-        float angle_d = fabs(angle2-angle1);
-        y_dist = fabs(y2-y1);
-        if(y1>y2) y_dist = y1-y2;
-        else y_dist = y2-y1;
-        x_dist = x2-x1;
-        min_h = min(height1,height2);
-        max_h = max(height1,height2);
-        height_d = fabs(height2-height1);
-        if(center_point1.x != center_point2.x)
-        {
-            K = (center_point1.y - center_point2.y) / (center_point1.x - center_point2.x);
-
-            //装甲板右边的点
-            result_armor[1].points(_pt);
-            if(angle2 > 50.0)
-            {
-                pt[2] = _pt[2];
-                pt[3] = _pt[1];
-            }else{
-                pt[2] = _pt[1];
-                pt[3] = _pt[0];
-            }
-            //面积比
-            if(area1 > area2){
-                area_rate = area1 / area2;
-            }else{
-                area_rate = area2 / area1;
-            }
-            angle_of_Rotated = MAX(Point_Angle(pt[0],pt[2]),Point_Angle(pt[1],pt[3]));//旋转矩形的角度
-
-            height_of_Rotated = MAX(MAX(result_armor[0].size.width,result_armor[1].size.width),
-                                    MAX(result_armor[0].size.height,result_armor[1].size.height));
-            x2h_rate = x_dist/height_of_Rotated;
-            //get circle diameter
-            double d=sqrt(pow(contours_para[0][1]-contours_para[1][1],2)
-                    +pow(contours_para[0][2]-contours_para[1][2],2));
-            float dh_rate = max(d/height1,d/height2);
-            if(y_dist<0.4*(height1+height2)&&(angle_d<20||angle_d>50)
-                   &&fabs(K)<0.5&&angle_of_Rotated<20&&area_rate<3.0&&x2h_rate>=0.8&&x2h_rate<=5&&dh_rate<4.5&&height_d<0.5*max_h)
-            {
-                Armordata pushdata;
-                diameters.push_back(d);
-                Point center=Point2f((x1+x2)*0.5,(y1+y2)*0.5);
-                armour_center.push_back(center);
-                VecPoint.push_back(pt[0]/*+Point2f(find_armour::x1,find_armour::y1)*/);
-                VecPoint.push_back(pt[1]/*+Point2f(find_armour::x1,find_armour::y1)*/);
-                VecPoint.push_back(pt[2]/*+Point2f(find_armour::x1,find_armour::y1)*/);
-                VecPoint.push_back(pt[3]/*+Point2f(find_armour::x1,find_armour::y1)*/);
-                Rotate_Points.push_back(VecPoint);
-                pushdata.armor_points[0] = pt[0];
-                pushdata.armor_points[1] = pt[1];
-                pushdata.armor_points[2] = pt[2];
-                pushdata.armor_points[3] = pt[3];
-                ArmorPoints.push_back(center);
-                Armordatas.push_back(pushdata);
-
-            }
-        }
-    }
-    else if(size>=3){
         for(int i=0;i<size-1;i++)
         {
-
             height1 = contours_para[i][0];
             x1 = contours_para[i][1];
             y1 = contours_para[i][2];
             angle1 = fabs(contours_para[i][3]);
-
             center_point1 = result_armor[i].center;
             area1 = result_armor[i].size.height * result_armor[i].size.width;
-
             result_armor[i].points(_pt);
              /**
               * pt
@@ -607,54 +531,171 @@ void find_armour::src_get_armor()
                     //get circle diameterArmorPoints.push_back(armor_center);
                     double d=sqrt(pow(contours_para[i][1]-contours_para[j][1],2)
                             +pow(contours_para[i][2]-contours_para[j][2],2));
-                    float dh_rate = max(d/height1,d/height2);
-
+//                    float dh_rate = max(d/height1,d/height2);
 //                    if(isROIflag==0)
 //                    {
                         if(y_dist<0.3*(height1+height2)&&(angle_d<20||angle_d>60)
-                               &&fabs(K)<0.4&&angle_of_Rotated<20&&area_rate<3.0&&x2h_rate>=0.8&&x2h_rate<=4&&dh_rate<4.5&&height_d<0.45*(height1+height2))
+                               &&fabs(K)<0.4&&angle_of_Rotated<30&&area_rate<3.0&&x2h_rate>=0.8&&x2h_rate<=5&&/*dh_rate<4.5&&*/height_d<0.45*(height1+height2))
                         {
-
                             Armordata pushdata;
                             diameters.push_back(d);
-
+                            diameters.push_back(d);
+                            Point center=Point2f((x1+x2)*0.5,(y1+y2)*0.5);
+                            VecPoint.push_back(pt[0]);
+                            VecPoint.push_back(pt[1]);
+                            VecPoint.push_back(pt[2]);
+                            VecPoint.push_back(pt[3]);
+                            pushdata.armor_points[0] = pt[0];
+                            pushdata.armor_points[1] = pt[1];
+                            pushdata.armor_points[2] = pt[2];
+                            pushdata.armor_points[3] = pt[3];
                             if(x2h_rate>3.5)
                             {
-                                big_diameters.push_back(d);
-                                Point center=Point2f((x1+x2)*0.5,(y1+y2)*0.5);
                                 big_armour_center.push_back(center);
-                                VecPoint.push_back(pt[0]);
-                                VecPoint.push_back(pt[1]);
-                                VecPoint.push_back(pt[2]);
-                                VecPoint.push_back(pt[3]);
                                 big_Rotate_Points.push_back(VecPoint);
-                                pushdata.armor_points[0] = pt[0];
-                                pushdata.armor_points[1] = pt[1];
-                                pushdata.armor_points[2] = pt[2];
-                                pushdata.armor_points[3] = pt[3];
+                                pushdata.armor = big_armor;
                                 ArmorPoints.push_back(center);
                                 Armordatas.push_back(pushdata);
 
                             }
                             else
                             {
-                                diameters.push_back(d);
-                                Point center=Point2f((x1+x2)*0.5,(y1+y2)*0.5);
                                 armour_center.push_back(center);
-                                VecPoint.push_back(pt[0]);
-                                VecPoint.push_back(pt[1]);
-                                VecPoint.push_back(pt[2]);
-                                VecPoint.push_back(pt[3]);
                                 Rotate_Points.push_back(VecPoint);
-                                pushdata.armor_points[0] = pt[0];
-                                pushdata.armor_points[1] = pt[1];
-                                pushdata.armor_points[2] = pt[2];
-                                pushdata.armor_points[3] = pt[3];
                                 ArmorPoints.push_back(center);
                                 Armordatas.push_back(pushdata);
-
                             }
                         }
+//                  }
+                }
+            }
+        }
+    }
+}
+
+//    else if(size>=3){
+//        for(int i=0;i<size-1;i++)
+//        {
+
+//            height1 = contours_para[i][0];
+//            x1 = contours_para[i][1];
+//            y1 = contours_para[i][2];
+//            angle1 = fabs(contours_para[i][3]);
+
+//            center_point1 = result_armor[i].center;
+//            area1 = result_armor[i].size.height * result_armor[i].size.width;
+
+//            result_armor[i].points(_pt);
+//             /**
+//              * pt
+//              * 0 2
+//              * 1 3
+//            */
+//            if(angle1 > 50.0)
+//            {
+//                pt[0] = _pt[3];
+//                pt[1] = _pt[0];
+//            }
+//            else
+//            {
+//                pt[0] = _pt[2];
+//                pt[1] = _pt[3];
+//            }
+//            for(int j = i+1;j<size;j++)
+//            {
+//                height2 = contours_para[j][0];
+//                x2 = contours_para[j][1];
+//                y2 = contours_para[j][2];
+//                angle2 = fabs(contours_para[j][3]);
+
+//                center_point2 = result_armor[j].center;
+//                area2 = result_armor[j].size.height * result_armor[j].size.width;
+
+//                float angle_d = fabs(angle2-angle1);
+//                y_dist = fabs(y2-y1);
+//                if(y1>y2) y_dist = y1-y2;
+//                else y_dist = y2-y1;
+//                x_dist = x2-x1;
+//                min_h = min(height1,height2);
+//                max_h = max(height1,height2);
+//                height_d = fabs(height2-height1);
+//                if(center_point1.x != center_point2.x)
+//                {
+//                    K = (center_point1.y - center_point2.y) / (center_point1.x - center_point2.x);
+
+//                    //装甲板右边的点
+//                    result_armor[j].points(_pt);
+//                    if(angle2 > 50.0)
+//                    {
+//                        pt[2] = _pt[2];
+//                        pt[3] = _pt[1];
+//                    }else{
+//                        pt[2] = _pt[1];
+//                        pt[3] = _pt[0];
+//                    }
+//                    //面积比
+//                    if(area1 > area2){
+//                        area_rate = area1 / area2;
+//                    }else{
+//                        area_rate = area2 / area1;
+//                    }
+//                    angle_of_Rotated = MAX(Point_Angle(pt[0],pt[2]),Point_Angle(pt[1],pt[3]));//旋转矩形的角度
+
+//                    height_of_Rotated = MAX(MAX(result_armor[i].size.width,result_armor[j].size.width),
+//                                            MAX(result_armor[i].size.height,result_armor[j].size.height));
+//                    x2h_rate = x_dist/height_of_Rotated;
+//                    //get circle diameterArmorPoints.push_back(armor_center);
+//                    double d=sqrt(pow(contours_para[i][1]-contours_para[j][1],2)
+//                            +pow(contours_para[i][2]-contours_para[j][2],2));
+//                    float dh_rate = max(d/height1,d/height2);
+
+////                    if(isROIflag==0)
+////                    {
+//                        if(y_dist<0.3*(height1+height2)&&(angle_d<20||angle_d>60)
+//                               &&fabs(K)<0.4&&angle_of_Rotated<20&&area_rate<3.0&&x2h_rate>=0.8&&x2h_rate<=4&&dh_rate<4.5&&height_d<0.45*(height1+height2))
+//                        {
+
+//                            Armordata pushdata;
+//                            diameters.push_back(d);
+
+//                            if(x2h_rate>3.5)
+//                            {
+//                                big_diameters.push_back(d);
+//                                Point center=Point2f((x1+x2)*0.5,(y1+y2)*0.5);
+//                                big_armour_center.push_back(center);
+//                                VecPoint.push_back(pt[0]);
+//                                VecPoint.push_back(pt[1]);
+//                                VecPoint.push_back(pt[2]);
+//                                VecPoint.push_back(pt[3]);
+//                                big_Rotate_Points.push_back(VecPoint);
+//                                pushdata.armor_points[0] = pt[0];
+//                                pushdata.armor_points[1] = pt[1];
+//                                pushdata.armor_points[2] = pt[2];
+//                                pushdata.armor_points[3] = pt[3];
+//                                pushdata.armor = big_armor;
+//                                ArmorPoints.push_back(center);
+//                                Armordatas.push_back(pushdata);
+
+//                            }
+//                            else
+//                            {
+//                                diameters.push_back(d);
+//                                Point center=Point2f((x1+x2)*0.5,(y1+y2)*0.5);
+//                                armour_center.push_back(center);
+//                                VecPoint.push_back(pt[0]);
+//                                VecPoint.push_back(pt[1]);
+//                                VecPoint.push_back(pt[2]);
+//                                VecPoint.push_back(pt[3]);
+//                                Rotate_Points.push_back(VecPoint);
+//                                pushdata.armor_points[0] = pt[0];
+//                                pushdata.armor_points[1] = pt[1];
+//                                pushdata.armor_points[2] = pt[2];
+//                                pushdata.armor_points[3] = pt[3];
+//                                ArmorPoints.push_back(center);
+//                                Armordatas.push_back(pushdata);
+
+//                            }
+//                        }
 //                    }
 //                    else
 //                    {
@@ -686,11 +727,11 @@ void find_armour::src_get_armor()
 //                            }
 //                        }
 //                    }
-                }
-            }
-        }
-    }
-}
+//                }
+//            }
+//        }
+//    }
+//}
 
 /**
  * @brief find_armour::search_armour  寻找装甲板的方法。分为截图和不截图两种情况

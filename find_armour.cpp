@@ -460,7 +460,7 @@ void find_armour::src_get_armor()
     float y1,y2;
     float y_dist,x_dist,min_h,height_d,K,x2h_rate,angle_diff,max_h;
     float angle_of_Rotated,height_of_Rotated;
-    if(size==2){
+    if(size>=2){
         for(int i=0;i<size-1;i++)
         {
             height1 = contours_para[i][0];

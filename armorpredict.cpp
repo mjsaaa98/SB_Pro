@@ -31,6 +31,7 @@ int ArmorPredict::Predict(vector<AbsPosition> Positions){
             Result = Positions[0];
         }
 
+        cout<<"K:"<<k<<endl;
         if(Result.z < 30){
             yaw_out = 0;
             pitch_out = 0;

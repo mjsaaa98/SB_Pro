@@ -35,7 +35,6 @@ SOURCES += main.cpp \
     find_armour.cpp \
     serialport.cpp \
     CRC_Check.cpp \
-    RMVideoCapture.cpp \
     v4l2_set.cpp
 
 HEADERS += \
@@ -48,5 +47,4 @@ HEADERS += \
     find_armour.h \
     serialport.h \
     CRC_Check.h \
-    RMVideoCapture.h \
     v4l2_set.h

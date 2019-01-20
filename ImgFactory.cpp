@@ -115,13 +115,113 @@ void ImgFactory::Img_handle(){
         if(Left_size == 0 && Right_size == 0){
             memset(&A_Predict.Vision,0,sizeof(VisionData));
         }else if(Left_size!=0 || Right_size != 0){
+#ifdef SHOW_DEBUG
+            for(int i =0 ;i < Left_size;i++)
+            {
+                circle(L_frame,Left_Points[i],30,Scalar(0,0,255),10);
+            }
+            for(int i =0 ;i < Right_size;i++)
+            {
+                circle(R_frame,Right_Points[i],30,Scalar(0,0,255),10);
+            }
+#endif
+            Positions.clear();  //qingkong neicun
             if(Left_size == Right_size){
-                cout<<"in"<<endl;
                 int small_dis_i;
                 Stereo.get_location(Left_Points,Right_Points,Positions);
                 small_dis_i = A_Predict.Predict(Positions);
-                circle(L_frame,Left_Points[small_dis_i],30,Scalar(0,0,255),10);
-                circle(R_frame,Right_Points[small_dis_i],30,Scalar(0,0,255),10);
+//                circle(L_frame,Left_Points[small_dis_i],30,Scalar(0,0,255),10);
+//                circle(R_frame,Right_Points[small_dis_i],30,Scalar(0,0,255),10);
+//                putText(L_frame,string(Left_Points[small_dis_i].x),Left_Points[small_dis_i],FONT_HERSHEY_SIMPLEX,3,Scalar(255,255,255));
+//                putText(R_frame,string(Right_Points[small_dis_i].x),Right_Points[small_dis_i],FONT_HERSHEY_SIMPLEX,3,Scalar(255,255,255));
+//                cout<<"Left:"<<Left_Points[small_dis_i].x<<endl<<"Right:"<<Right_Points[small_dis_i].x<<endl;
+                L_find_armour.LastArmor = Left_Armordata[A_Predict.Result.index];
+                R_find_armour.LastArmor = Right_Armordata[A_Predict.Result.index];
+            }
+            else if (Right_size==2&&Left_size==Right_size-1)
+            {
+                Point2f temp;
+                if(abs((Left_Points[0].x-Right_Points[0].x)-265)>abs((Left_Points[0].x-Right_Points[1].x)-265))
+                {
+                    temp = Right_Points[1];
+                    Right_Points.clear();
+                    Right_Points.push_back(temp);
+                }
+                else
+                {
+                    Right_Points.pop_back();
+                }
+                int small_dis_i;
+                Stereo.get_location(Left_Points,Right_Points,Positions);
+                small_dis_i = A_Predict.Predict(Positions);
+//                circle(L_frame,Left_Points[small_dis_i],30,Scalar(0,0,255),10);
+//                circle(R_frame,Right_Points[small_dis_i],30,Scalar(0,0,255),10);
+//                putText(L_frame,string(Left_Points[small_dis_i].x),Left_Points[small_dis_i],FONT_HERSHEY_SIMPLEX,3,Scalar(255,255,255));
+//                putText(R_frame,string(Right_Points[small_dis_i].x),Right_Points[small_dis_i],FONT_HERSHEY_SIMPLEX,3,Scalar(255,255,255));
+//                cout<<"Left:"<<Left_Points[small_dis_i].x<<endl<<"Right:"<<Right_Points[small_dis_i].x<<endl;
+                L_find_armour.LastArmor = Left_Armordata[A_Predict.Result.index];
+                R_find_armour.LastArmor = Right_Armordata[A_Predict.Result.index];
+            }
+            else if (Right_size==3&&Left_size==Right_size-1)
+            {
+                cout<<"22222   33333"<<endl;
+                vector<Point2f> temp;
+                if(abs((Left_Points[0].x-Right_Points[0].x)-265)>abs((Left_Points[0].x-Right_Points[1].x)-265))
+                {
+                    temp.push_back(Right_Points[1]);
+                    temp.push_back(Right_Points[2]);
+                    Right_Points.clear();
+                    Right_Points = temp;
+                }
+                else if(abs((Left_Points[1].x-Right_Points[1].x)-265)>abs((Left_Points[1].x-Right_Points[2].x)-265))
+                {
+                    temp.push_back(Right_Points[0]);
+                    temp.push_back(Right_Points[2]);
+                    Right_Points.clear();
+                    Right_Points = temp;
+                }
+                else
+                {
+                    Right_Points.pop_back();
+                }
+                int small_dis_i;
+                Stereo.get_location(Left_Points,Right_Points,Positions);
+                small_dis_i = A_Predict.Predict(Positions);
+//                circle(L_frame,Left_Points[small_dis_i],30,Scalar(0,0,255),10);
+//                circle(R_frame,Right_Points[small_dis_i],30,Scalar(0,0,255),10);
+//                putText(L_frame,string(Left_Points[small_dis_i].x),Left_Points[small_dis_i],FONT_HERSHEY_SIMPLEX,3,Scalar(255,255,255));
+//                putText(R_frame,string(Right_Points[small_dis_i].x),Right_Points[small_dis_i],FONT_HERSHEY_SIMPLEX,3,Scalar(255,255,255));
+//                cout<<"Left:"<<Left_Points[small_dis_i].x<<endl<<"Right:"<<Right_Points[small_dis_i].x<<endl;
+                L_find_armour.LastArmor = Left_Armordata[A_Predict.Result.index];
+                R_find_armour.LastArmor = Right_Armordata[A_Predict.Result.index];
+            }
+            else if(Left_size==3&&Left_size==Right_size+1)
+            {
+                cout<<"33333   222222"<<endl;
+                vector<Point2f> temp;
+                if(abs((Left_Points[0].x-Right_Points[0].x)-265)>abs((Left_Points[1].x-Right_Points[0].x)-265))
+                {
+                    temp.push_back(Left_Points[1]);
+                    temp.push_back(Left_Points[2]);
+                    Left_Points.clear();
+                    Left_Points = temp;
+                }
+                else if(abs((Left_Points[1].x-Right_Points[1].x)-265)>abs((Left_Points[2].x-Right_Points[1].x)-265))
+                {
+                    temp.push_back(Left_Points[0]);
+                    temp.push_back(Left_Points[2]);
+                    Left_Points.clear();
+                    Left_Points = temp;
+                }
+                else
+                {
+                    Left_Points.pop_back();
+                }
+                int small_dis_i;
+                Stereo.get_location(Left_Points,Right_Points,Positions);
+                small_dis_i = A_Predict.Predict(Positions);
+//                circle(L_frame,Left_Points[small_dis_i],30,Scalar(0,0,255),10);
+//                circle(R_frame,Right_Points[small_dis_i],30,Scalar(0,0,255),10);
 //                putText(L_frame,string(Left_Points[small_dis_i].x),Left_Points[small_dis_i],FONT_HERSHEY_SIMPLEX,3,Scalar(255,255,255));
 //                putText(R_frame,string(Right_Points[small_dis_i].x),Right_Points[small_dis_i],FONT_HERSHEY_SIMPLEX,3,Scalar(255,255,255));
                 cout<<"Left:"<<Left_Points[small_dis_i].x<<endl<<"Right:"<<Right_Points[small_dis_i].x<<endl;

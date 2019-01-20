@@ -1,7 +1,7 @@
 #include "Header.h"
 #include <ImgFactory.h>
 #include "camera_calibration.h"
-#include "RMVideoCapture.h"
+//#include "RMVideoCapture.h"
 #include "armorpredict.h"
 #include "CRC_Check.h"
 #include "serialport.h"
@@ -22,10 +22,10 @@ int main()
     int fd1 = open("/dev/video1",O_RDWR);
     int fd2 = open("/dev/video2",O_RDWR);
     v4l2_set vs1(fd1),vs2(fd2);
-//    vs1.set_saturation(10);      //饱和度
+    vs1.set_saturation(64);      //饱和度
     vs1.set_exposure(10);     //曝光
     int camnum1 = vs1.set_camnum();
-//    vs2.set_saturation(saturaion);      //饱和度
+    vs2.set_saturation(32);      //饱和度
     vs2.set_exposure(10);     //曝光
     int camnum2 = vs2.set_camnum();
     VideoCapture camera1(1),camera2(2);

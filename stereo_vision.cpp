@@ -8,9 +8,11 @@ stereo_vision::stereo_vision()
     stereo_yaml["distCoeffL"] >> distCoeffL;
     stereo_yaml["distCoeffR"] >> distCoeffR;
     stereo_yaml["Rl"] >> Rl;
+    stereo_yaml["Pl"] >> Pl;
     stereo_yaml["Rr"] >> Rr;
     stereo_yaml["Pr"] >> Pr;
     stereo_yaml["Q"] >> Q;
+    cout<<"ca  :"<<cameraMatrixL<<endl;
     stereo_yaml.release();
 }
 
@@ -37,7 +39,7 @@ void stereo_vision::Init(const string &yaml){
   */
 void stereo_vision::get_location(const vector<Point2f> &Left_Points, const vector<Point2f> &Right_Points, vector<AbsPosition> &Result)
 {
-
+//    cout<<"::::"<<Left_Points[0].x<<endl<<Right_Points[0].x<<endl;
     vector<Point2f> left_distort_points,Right_distort_points;
     undistortPoints(Left_Points,left_distort_points,cameraMatrixL,distCoeffL,Rl,Pl);
     undistortPoints(Right_Points,Right_distort_points,cameraMatrixR,distCoeffR,Rr,Pr);
@@ -62,7 +64,6 @@ void stereo_vision::get_location(const vector<Point2f> &Left_Points, const vecto
                 Pos.z = xyzw.at<double>(2,0)/xyzw.at<double>(3,0);
                 Pos.y = xyzw.at<double>(1,0)/xyzw.at<double>(3,0);
                 Pos.x = xyzw.at<double>(0,0)/xyzw.at<double>(3,0);
-
                 if(Pos.z > 50){
                     Pos.x -= x_tranz;
                     Pos.y -= y_tranz;
@@ -73,9 +74,9 @@ void stereo_vision::get_location(const vector<Point2f> &Left_Points, const vecto
             }
         }
     }
-    else if(Lsize>Rsize)
-    {
+//    else if(Lsize>Rsize)
+//    {
 
-    }
+//    }
 }
 

@@ -16,7 +16,7 @@ public:
     int Predict(vector<AbsPosition> Positions);
 
 private:
-    void AngleFit(const AbsPosition input);
+    void AngleFit( AbsPosition& input);
     void Fresh();
 public:
     AbsPosition Result, OldResult;

@@ -74,7 +74,7 @@ class SerialPort
     void set_Brate();
     int set_Bit(int, int, int);
     int set_disp_mode(int);
-    void get_Mode(int &mode,VisionData &,int &);
+    void get_Mode(int &mode);
     void TransformTarPos(const VisionData &data);
     void send(int p, int yaw, int dis, char flag, int);
     void TransformData(const VisionData &data);

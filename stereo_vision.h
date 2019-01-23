@@ -12,7 +12,7 @@ public:
         y_tranz = y;
         z_tranz = z;
     }
-    void get_location(const vector<Point2f> &left, const vector<Point2f> &right, vector<AbsPosition> &Result);
+    void get_location( vector<Point2f> &left,  vector<Point2f> &right, vector<AbsPosition> &Result);
 private:
     Mat cameraMatrixL;
     Mat cameraMatrixR;

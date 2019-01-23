@@ -1,0 +1,65 @@
+%YAML:1.0
+---
+#camera_neican 
+camera_matrix: !!opencv-matrix   
+    rows: 3
+    cols: 3
+    dt: f
+    data: [527.3444,0,337.5232,0,531.2206,254.4946, 0,0,1]
+
+#camera_jibian
+dist_matrix: !!opencv-matrix
+    rows: 5
+    cols: 1
+    dt: f
+    data: [-0.4259,0.2928,-0.0106,-0.0031,0]
+    
+
+
+#v4l2 canshu .
+exposure: 10
+saturation: 64
+contrast: 32
+gain: 20
+brightness: 0
+white: 5000
+
+
+#name of device.
+string_dev:
+   - "/dev/video0"
+
+filename: "/home/mjs/Videos/blue.avi"
+
+#video file path.
+string_read:
+   - "/home/mjs/Videos/blue.avi"
+   - "/home/mjs/Videos/red.avi"
+
+
+#HSV_blue
+iLowH: 60
+iHighH: 130
+iLowS: 30
+iHighS: 255
+iLowV: 30
+iHighV: 255
+
+
+#ROI contour's canshu
+y_dist_wucha_ROI: 50
+height_d_wucha_ROI: 30
+
+
+#dst contour's canshu
+area_min: 50
+angle1: -30
+angle2: -50
+y_dist_wucha: 30
+max_rate: 3
+min_rate: 0.2
+height_d_wucha: 20
+
+
+
+

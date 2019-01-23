@@ -287,10 +287,8 @@ void find_armour::src_get_armor()
         x1 = contours_para[0][1];
         y1 = contours_para[0][2];
         angle1 = fabs(contours_para[0][3]);
-
         center_point1 = result_armor[0].center;
         area1 = result_armor[0].size.height * result_armor[0].size.width;
-
         result_armor[0].points(_pt);
          /**
           * pt
@@ -312,7 +310,6 @@ void find_armour::src_get_armor()
         x2 = contours_para[1][1];
         y2 = contours_para[1][2];
         angle2 = fabs(contours_para[1][3]);
-
         center_point2 = result_armor[1].center;
         area2 = result_armor[1].size.height * result_armor[1].size.width;
 
@@ -343,10 +340,9 @@ void find_armour::src_get_armor()
             }else{
                 area_rate = area2 / area1;
             }
-//            angle_of_Rotated = MAX(Point_Angle(pt[0],pt[2]),Point_Angle(pt[1],pt[3]));//旋转矩形的角度
-
-//            height_of_Rotated = MAX(MAX(result_armor[0].size.width,result_armor[1].size.width),
-//                                    MAX(result_armor[0].size.height,result_armor[1].size.height)); //旋转矩形的
+            angle_of_Rotated = MAX(Point_Angle(pt[0],pt[2]),Point_Angle(pt[1],pt[3]));//旋转矩形的角度
+            height_of_Rotated = MAX(MAX(result_armor[0].size.width,result_armor[1].size.width),
+                                    MAX(result_armor[0].size.height,result_armor[1].size.height)); //旋转矩形的
             x2h_rate = x_dist/height_of_Rotated;
             //get circle diameter
             float d=sqrt(pow(contours_para[0][1]-contours_para[1][1],2)
@@ -438,10 +434,10 @@ void find_armour::src_get_armor()
                     }else{
                         area_rate = area2 / area1;
                     }
-//                    angle_of_Rotated = MAX(Point_Angle(pt[0],pt[2]),Point_Angle(pt[1],pt[3]));//旋转矩形的角度
+                    angle_of_Rotated = MAX(Point_Angle(pt[0],pt[2]),Point_Angle(pt[1],pt[3]));//旋转矩形的角度
 
-//                    height_of_Rotated = MAX(MAX(result_armor[i].size.width,result_armor[j].size.width),
-//                                            MAX(result_armor[i].size.height,result_armor[j].size.height));
+                    height_of_Rotated = MAX(MAX(result_armor[i].size.width,result_armor[j].size.width),
+                                            MAX(result_armor[i].size.height,result_armor[j].size.height));
                     x2h_rate = x_dist/height_of_Rotated;
                     //get circle diameterArmorPoints.push_back(armor_center);
                     float d=sqrt(pow(contours_para[i][1]-contours_para[j][1],2)
@@ -451,7 +447,7 @@ void find_armour::src_get_armor()
                     {
 //                    cout<<"Rate::"<<x2h_rate<<" "<<fabs(K)<<" "<<endl;
 //                    cout<<"IN?"<<endl;
-                        if(y_dist<=0.35*(height1+height2)&&(angle_d<20||angle_d>60)
+                        if(y_dist<=0.4*(height1+height2)&&(angle_d<20||angle_d>60)
                                &&fabs(K)<0.4&&angle_of_Rotated<30&&area_rate<3.0&&x2h_rate>=0.8&&x2h_rate<=4.5&&/*dh_rate<4.5&&*/height_d<0.45*(height1+height2))
                         {
 //                            cout<<"IN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
@@ -473,7 +469,7 @@ void find_armour::src_get_armor()
                     }
                     else
                     {//size>3+截图
-                        if(y_dist<0.3*(height1+height2)
+                        if(y_dist<0.45*(height1+height2)
                                &&fabs(K)<0.5&&angle_of_Rotated<20&&area_rate<3.5&&x2h_rate>=0.8&&x2h_rate<=4.5&&/*dh_rate<4.5&&*/height_d<0.5*max_h)
                         {
                             Armordata pushdata;

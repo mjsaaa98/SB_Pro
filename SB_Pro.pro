@@ -27,7 +27,6 @@ LIBS += /usr/local/lib/libopencv_highgui.so.3.3 \
         /usr/local/lib/libopencv_ml.so\
         /usr/local/lib/libopencv_dnn.so.3.3
 SOURCES += main.cpp \
-    ImgFactory.cpp \
     camera_calibration.cpp \
     solvepnp.cpp \
     stereo_vision.cpp \
@@ -38,7 +37,6 @@ SOURCES += main.cpp \
     v4l2_set.cpp
 
 HEADERS += \
-    ImgFactory.h \
     camera_calibration.h \
     Header.h \
     solvepnp.h \

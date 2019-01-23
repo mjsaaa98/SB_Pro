@@ -13,9 +13,9 @@
 #include <thread>
 #include <mutex>
 #include <string.h>
-//#define SHOW_DEBUG
+#define SHOW_DEBUG
 //#define PRINT
-#define OPEN_SERIAL
+//#define OPEN_SERIAL
 
 #define BLUE_DETECT true
 #define RED_DETECT false
@@ -60,6 +60,7 @@ typedef struct{
     Point armor_center = Point(0,0);
     float distance = 0.0;//mm
     Point2f armor_points[4] = {Point(0,0),Point(0,0),Point(0,0),Point(0,0)};
+    float diameter;
     armor_type armor = small_armor;
 }Armordata;
 

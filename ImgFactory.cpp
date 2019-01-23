@@ -115,8 +115,13 @@ void ImgFactory::Img_handle(){
         R_list_of_frame.clear();
         R_handle_flag = false;
         Lock.unlock();
+//        thread L_get_armor(&find_armour::get_armor,&L_find_armour,ref(L_frame),ref(L_dst),mode,true);
+//        thread R_get_armor(&find_armour::get_armor,&L_find_armour,ref(R_frame),ref(R_dst),mode,false);
+//        L_get_armor.join();
+//        R_get_armor.join();
         L_find_armour.get_armor(L_frame,L_dst,mode,true);
         R_find_armour.get_armor(R_frame,R_dst,mode,false);
+
         Left_Points = L_find_armour.ArmorPoints;
         Right_Points = R_find_armour.ArmorPoints;
         Left_Armordata = L_find_armour.Armordatas;
@@ -159,110 +164,109 @@ void ImgFactory::Img_handle(){
                 circle(L_frame,Left_Points[small_dis_i],40,Scalar(255,0,0),5);
                 circle(R_frame,Right_Points[small_dis_i],40,Scalar(255,0,0),5);
 #endif
-//                putText(L_frame,string(Left_Points[small_dis_i].x),Left_Points[small_dis_i],FONT_HERSHEY_SIMPLEX,3,Scalar(255,255,255));
-//                putText(R_frame,string(Right_Points[small_dis_i].x),Right_Points[small_dis_i],FONT_HERSHEY_SIMPLEX,3,Scalar(255,255,255));
 //                cout<<"Left:"<<Left_Points[small_dis_i].x<<endl<<"Right:"<<Right_Points[small_dis_i].x<<endl;
 //                cout<<"LeftYYYY:"<<Left_Points[small_dis_i].y<<endl<<"Right:"<<Right_Points[small_dis_i].y<<endl;
                 L_find_armour.LastArmor = Left_Armordata[A_Predict.Result.index];
                 R_find_armour.LastArmor = Right_Armordata[A_Predict.Result.index];
+                L_find_armour.isROIflag = 1;
+                R_find_armour.isROIflag = 1;
             }
-            else if(Left_size>Right_size)
-            {
-                cout<<"左边点多，开始选点！"<<endl;
-                size_t t = Left_size-Right_size;
-                int i=0,j,s;
-                vector<Point2f> temp;
-                //开始匹配选点
-                for(s = 0;s<Right_size;s++)
-                {
-                    for(i; i<=t+s ;i++)
-                    {
-                        if(72<=abs((Left_Points[i].y-Right_Points[s].y))&&abs((Left_Points[i].y-Right_Points[s].y))<=87
-                                /*&&250<=Left_Points[i].x-Right_Points[s].x&&Left_Points[i].x-Right_Points[s].x<=280*/)
-                        {
-                            temp.push_back(Left_Points[i]);
-                            i++;
-                            break;
-                        }
-                    }
-                    if(i==t+s+1&&s<Right_size-1)
-                    {
-                        for (int j = i;j<Left_size;j++)
-                        {
-                            temp.push_back(Left_Points[j]);
-                        }
-                        break;
-                    }
-                }
-                Left_Points.clear();
-                Left_Points = temp;
-                if(Left_size == Right_size){
-                    cout<<"选点成功！"<<endl;
-                    int small_dis_i;
-                    Stereo.get_location(Left_Points,Right_Points,Positions);
-                    small_dis_i = A_Predict.Predict(Positions);
-    #ifdef SHOW_DEBUG
-                    circle(L_frame,Left_Points[small_dis_i],40,Scalar(255,0,0),5);
-                    circle(R_frame,Right_Points[small_dis_i],40,Scalar(255,0,0),5);
-    #endif
-    //                putText(L_frame,string(Left_Points[small_dis_i].x),Left_Points[small_dis_i],FONT_HERSHEY_SIMPLEX,3,Scalar(255,255,255));
-    //                putText(R_frame,string(Right_Points[small_dis_i].x),Right_Points[small_dis_i],FONT_HERSHEY_SIMPLEX,3,Scalar(255,255,255));
-    //                cout<<"Left:"<<Left_Points[small_dis_i].x<<endl<<"Right:"<<Right_Points[small_dis_i].x<<endl;
-                    cout<<"LeftYYYY:"<<Left_Points[small_dis_i].y<<endl<<"Right:"<<Right_Points[small_dis_i].y<<endl;
-                    L_find_armour.LastArmor = Left_Armordata[A_Predict.Result.index];
-                    R_find_armour.LastArmor = Right_Armordata[A_Predict.Result.index];
-                }
-            }
-            else{
-                cout<<"右边点多，开始选点！"<<endl;
-                size_t t = Right_size-Left_size;
-                int i=0,j,s;
-                vector<Point2f> temp;
-                //开始匹配选点
-                for(s = 0;s<Left_size;s++)
-                {
-                    for(i; i<=t+s ;i++)
-                    {
-                        if(70<=abs((Left_Points[s].y-Right_Points[i].y))&&abs((Left_Points[s].y-Right_Points[i].y))<=85
-                                /*&&250<=(Left_Points[s].x-Right_Points[i].x)&&(Left_Points[s].x-Right_Points[i].x)<=280*/)
-                        {
-                            cout<<"Y最短距离"<<abs((Left_Points[s].y-Right_Points[i].y))<<endl;
-                            temp.push_back(Right_Points[i]);
-                            i++;
-                            break;
-                        }
-                        cout<<"Y距离"<<abs((Left_Points[s].y-Right_Points[i].y))<<endl;
-                    }
-                    if(i==t+s+1&&s<Left_size-1)
-                    {
-                        for (int j = i;j<Right_size;j++)
-                        {
-                            temp.push_back(Right_Points[j]);
-                        }
-                        break;
-                    }
-                }
-
-                Right_Points.clear();
-                Right_Points = temp;
-                Right_size = Right_Points.size();
-                if(Left_size == Right_size){
-                    cout<<"选点成功！"<<endl;
-                    int small_dis_i;
-                    Stereo.get_location(Left_Points,Right_Points,Positions);
-                    small_dis_i = A_Predict.Predict(Positions);
-    #ifdef SHOW_DEBUG
-                    circle(L_frame,Left_Points[small_dis_i],40,Scalar(255,0,0),5);
-                    circle(R_frame,Right_Points[small_dis_i],40,Scalar(255,0,0),5);
-    #endif
-    //                putText(L_frame,string(Left_Points[small_dis_i].x),Left_Points[small_dis_i],FONT_HERSHEY_SIMPLEX,3,Scalar(255,255,255));
-    //                putText(R_frame,string(Right_Points[small_dis_i].x),Right_Points[small_dis_i],FONT_HERSHEY_SIMPLEX,3,Scalar(255,255,255));
-    //                cout<<"Left:"<<Left_Points[small_dis_i].x<<endl<<"Right:"<<Right_Points[small_dis_i].x<<endl;
+//            else if(Left_size>Right_size)
+//            {
+//                cout<<"左边点多，开始选点！"<<endl;
+//                size_t t = Left_size-Right_size;
+//                int i=0,j,s;
+//                vector<Point2f> temp;
+//                //开始匹配选点
+//                for(s = 0;s<Right_size;s++)
+//                {
+//                    for(i; i<=t+s ;i++)
+//                    {
+//                        if(72<=abs((Left_Points[i].y-Right_Points[s].y))&&abs((Left_Points[i].y-Right_Points[s].y))<=87
+//                                /*&&250<=Left_Points[i].x-Right_Points[s].x&&Left_Points[i].x-Right_Points[s].x<=280*/)
+//                        {
+//                            temp.push_back(Left_Points[i]);
+//                            i++;
+//                            break;
+//                        }
+//                    }
+//                    if(i==t+s+1&&s<Right_size-1)
+//                    {
+//                        for (int j = i;j<Left_size;j++)
+//                        {
+//                            temp.push_back(Left_Points[j]);
+//                        }
+//                        break;
+//                    }
+//                }
+//                Left_Points.clear();
+//                Left_Points = temp;
+//                if(Left_size == Right_size){
+//                    cout<<"选点成功！"<<endl;
+//                    int small_dis_i;
+//                    Stereo.get_location(Left_Points,Right_Points,Positions);
+//                    small_dis_i = A_Predict.Predict(Positions);
+//    #ifdef SHOW_DEBUG
+//                    circle(L_frame,Left_Points[small_dis_i],40,Scalar(255,0,0),5);
+//                    circle(R_frame,Right_Points[small_dis_i],40,Scalar(255,0,0),5);
+//    #endif
+//    //                cout<<"Left:"<<Left_Points[small_dis_i].x<<endl<<"Right:"<<Right_Points[small_dis_i].x<<endl;
 //                    cout<<"LeftYYYY:"<<Left_Points[small_dis_i].y<<endl<<"Right:"<<Right_Points[small_dis_i].y<<endl;
-                    L_find_armour.LastArmor = Left_Armordata[A_Predict.Result.index];
-                    R_find_armour.LastArmor = Right_Armordata[A_Predict.Result.index];
-                }
-            }
+//                    L_find_armour.LastArmor = Left_Armordata[A_Predict.Result.index];
+//                    R_find_armour.LastArmor = Right_Armordata[A_Predict.Result.index];
+//                }
+//            }
+//            else{
+//                cout<<"右边点多，开始选点！"<<endl;
+//                size_t t = Right_size-Left_size;
+//                int i=0,j,s;
+//                vector<Point2f> temp;
+//                //开始匹配选点
+//                for(s = 0;s<Left_size;s++)
+//                {
+//                    for(i; i<=t+s ;i++)
+//                    {
+//                        if(70<=abs((Left_Points[s].y-Right_Points[i].y))&&abs((Left_Points[s].y-Right_Points[i].y))<=85
+//                                /*&&250<=(Left_Points[s].x-Right_Points[i].x)&&(Left_Points[s].x-Right_Points[i].x)<=280*/)
+//                        {
+//                            cout<<"Y最短距离"<<abs((Left_Points[s].y-Right_Points[i].y))<<endl;
+//                            temp.push_back(Right_Points[i]);
+//                            i++;
+//                            break;
+//                        }
+//                        cout<<"Y距离"<<abs((Left_Points[s].y-Right_Points[i].y))<<endl;
+//                    }
+//                    if(i==t+s+1&&s<Left_size-1)
+//                    {
+//                        for (int j = i;j<Right_size;j++)
+//                        {
+//                            temp.push_back(Right_Points[j]);
+//                        }
+//                        break;
+//                    }
+//                }
+//                Right_Points.clear();
+//                Right_Points = temp;
+//                Right_size = Right_Points.size();
+//                if(Left_size == Right_size){
+//                    cout<<"选点成功！"<<endl;
+//                    int small_dis_i;
+//                    Stereo.get_location(Left_Points,Right_Points,Positions);
+//                    small_dis_i = A_Predict.Predict(Positions);
+//    #ifdef SHOW_DEBUG
+//                    circle(L_frame,Left_Points[small_dis_i],40,Scalar(255,0,0),5);
+//                    circle(R_frame,Right_Points[small_dis_i],40,Scalar(255,0,0),5);
+//    #endif
+//    //                putText(L_frame,string(Left_Points[small_dis_i].x),Left_Points[small_dis_i],FONT_HERSHEY_SIMPLEX,3,Scalar(255,255,255));
+//    //                putText(R_frame,string(Right_Points[small_dis_i].x),Right_Points[small_dis_i],FONT_HERSHEY_SIMPLEX,3,Scalar(255,255,255));
+//    //                cout<<"Left:"<<Left_Points[small_dis_i].x<<endl<<"Right:"<<Right_Points[small_dis_i].x<<endl;
+////                    cout<<"LeftYYYY:"<<Left_Points[small_dis_i].y<<endl<<"Right:"<<Right_Points[small_dis_i].y<<endl;
+//                    L_find_armour.LastArmor = Left_Armordata[A_Predict.Result.index];
+//                    R_find_armour.LastArmor = Right_Armordata[A_Predict.Result.index];
+//                }
+//            }
+
+////------------------------单目------------------------------------
 //            else if(Left_size > Right_size){
 //                Left_PnP.get_location(Left_Armordata,Positions);
 //                A_Predict.Predict(Positions);

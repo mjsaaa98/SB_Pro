@@ -65,20 +65,16 @@ public:
 public:
     int isfind;
     int ismiddle;
+    int isROIflag;
     vector<Armordata> Armordatas;
     vector<Point2f> ArmorPoints;
     Armordata LastArmor;
 private:
     void clear_data();   //切换指令时清空所有数据
     void Clear();   //清空所有数据结构
-    vector<float> diameters;
     vector<Point2f> armour_center;
-    vector<float> big_diameters;
     vector<Point2f> big_armour_center;
     vector<vector<RotatedRect> > Armorlists;
-    vector<Point2f> Rotate_Point;
-    vector<vector<Point2f> > Rotate_Points;
-    vector<vector<Point2f> > big_Rotate_Points;
     vector<RotatedRect> fir_armor,result_armor;
     vector<Vec4f> contours_para;
     vector<int> CellMaxs;
@@ -87,17 +83,15 @@ private:
     float a1,a2,area_min,min_rate,max_rate,height_d_wucha,y_dist_wucha;
 private:
     //与截图有关的参数
-    int isROIflag;
     int last_mode;
-    Point2f last_center;
     Mat dstROI;
-    float last_d;
     float last_angle;
     Size2f last_size;
 private:
     int vmin = 10, vmax = 256, smin = 30;
     int find_armor_flag=0;
     int isfindflag = 0;
+
 
     Mat frame, hsv, hue,hue1, mask,mask1, hist, hist1,histimg = Mat::zeros(640, 480, CV_8UC3),histimg1 = Mat::zeros(640, 480, CV_8UC3), backproj,backproj1;
 

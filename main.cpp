@@ -40,11 +40,11 @@ int main()
     }
     VideoCapture cap_left,cap_right;
     bool camstatus[2] = {false,false};
-    if(camnum1 == 1){
+    if(camnum1 == 2){
         cap_left = camera1;
         camstatus[0] = true;
     }
-    else if(camnum2 == 1){
+    else if(camnum2 == 2){
         cap_left = camera2;
         camstatus[0] = true;
     }
@@ -52,11 +52,11 @@ int main()
         camstatus[0] = false;
     }
 
-    if(camnum1 == 2){
+    if(camnum1 == 1){
         cap_right = camera1;
         camstatus[1] = true;
     }
-    else if(camnum2 == 2){
+    else if(camnum2 == 1){
         cap_right = camera2;
         camstatus[1] = true;
     }

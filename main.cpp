@@ -107,8 +107,7 @@ int main()
         t1 = getTickCount();
 #endif
 #ifdef OPEN_SERIAL
-//        int CommanID;
-//        sp.get_Mode(CommanID);
+//        sp.get_Mode(mode);
 #endif
         Mat L_dst,R_dst;
 //        thread L_get_armor(&find_armour::get_armor,&L_find_armour,ref(L_frame),ref(L_dst),mode,true);
@@ -160,8 +159,6 @@ int main()
                 circle(L_frame,Left_Points[small_dis_i],40,Scalar(255,0,0),5);
                 circle(R_frame,Right_Points[small_dis_i],40,Scalar(255,0,0),5);
 #endif
-//                cout<<"Left:"<<Left_Points[small_dis_i].x<<endl<<"Right:"<<Right_Points[small_dis_i].x<<endl;
-//                cout<<"LeftYYYY:"<<Left_Points[small_dis_i].y<<endl<<"Right:"<<Right_Points[small_dis_i].y<<endl;
                 L_find_armour.LastArmor = Left_Armordata[A_Predict.Result.index];
                 R_find_armour.LastArmor = Right_Armordata[A_Predict.Result.index];
                 L_find_armour.isROIflag = 1;
@@ -277,8 +274,7 @@ int main()
 
 #ifdef SHOW_DEBUG
         char screen_data[100];
-        t3 = getTickCount();
-        sprintf(screen_data,"dis:%fm   time:%fs",A_Predict.Vision.dis.f/1000,(t3-t1)/getTickFrequency()*1000);
+        sprintf(screen_data,"dis:%fm   time:%fs",A_Predict.Vision.dis.f/1000,time.e);
         putText(L_frame,screen_data,Point(100,100),1,5,Scalar(255,255,255));
         imshow("LEFT_img",L_frame);
         imshow("LEFT_dst",L_dst);

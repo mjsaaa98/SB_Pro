@@ -56,7 +56,9 @@ class find_armour
 public:
     find_armour();
     Mat roi(Mat,Point,float);
-    float Point_Angle(const Point2f &p1,const Point2f &p2);
+    float Point_Angle(const Point2f &p1,const Point2f &p2){
+        return fabs(atan2(p2.y-p1.y,p2.x-p1.x)*180.0/CV_PI);
+    }
     void image_preprocess(int mode,Mat src,Mat &);
     void search_armour(Mat&img,Mat&dst);
     void get_Light();
@@ -72,8 +74,6 @@ public:
 private:
     void clear_data();   //切换指令时清空所有数据
     void Clear();   //清空所有数据结构
-    vector<Point2f> armour_center;
-    vector<Point2f> big_armour_center;
     vector<vector<RotatedRect> > Armorlists;
     vector<RotatedRect> fir_armor,result_armor;
     vector<Vec4f> contours_para;
@@ -84,17 +84,7 @@ private:
 private:
     //与截图有关的参数
     int last_mode;
-    Mat dstROI;
-    float last_angle;
-    Size2f last_size;
-private:
-    int vmin = 10, vmax = 256, smin = 30;
-    int find_armor_flag=0;
-    int isfindflag = 0;
-
-
-    Mat frame, hsv, hue,hue1, mask,mask1, hist, hist1,histimg = Mat::zeros(640, 480, CV_8UC3),histimg1 = Mat::zeros(640, 480, CV_8UC3), backproj,backproj1;
-
+    Mat img_ROI;
 };
 
 #endif // FIND_ARMOUR_H

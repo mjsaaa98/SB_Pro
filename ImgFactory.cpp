@@ -99,15 +99,13 @@ void ImgFactory::Img_handle(){
 #endif
     while(1)
     {
-#ifdef SHOW_DEBUG
+        Mat L_dst,R_dst;
         double t1=0,t3 = 0;
         t1 = getTickCount();
-#endif
 #ifdef OPEN_SERIAL
 //        int CommanID;
 //        sp.get_Mode(CommanID);
 #endif
-        Mat L_dst,R_dst;
         while(L_handle_flag==false||R_handle_flag==false);
         Lock.lock();
         L_frame = L_list_of_frame.back();
@@ -279,12 +277,12 @@ void ImgFactory::Img_handle(){
 //            }
 
         }
-//                cout<<"time:"<<(t3-t1)/getTickFrequency()*1000<<endl;
+                t3 = getTickCount();
+//                cout<<"time:"<<(t3-t1)/getTickFrequency()*1000<<endl;#ifdef OPEN_SERIAL
 
-#ifdef SHOW_DEBUG
-        t3 = getTickCount();
         sprintf(screen_data,"dis:%fm   time:%fs",A_Predict.Vision.dis.f/1000,(t3-t1)/getTickFrequency()*1000);
         putText(L_frame,screen_data,Point(100,100),1,5,Scalar(255,255,255));
+#ifdef SHOW_DEBUG
         imshow("LEFT_img",L_frame);
         imshow("LEFT_dst",L_dst);
         imshow("RIGHT_img",R_frame);

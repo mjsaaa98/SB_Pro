@@ -21,9 +21,9 @@ int main()
     int fd2 = open("/dev/video1",O_RDWR);
     v4l2_set vs1(fd1),vs2(fd2);
 //    vs1.set_saturation(70);      //饱和度
-    vs1.set_exposure(10);     //曝光
+//    vs1.set_exposure(100);     //曝光
 //    vs2.set_saturation(150);      //饱和度
-    vs2.set_exposure(10);     //曝光
+//    vs2.set_exposure(100);     //曝光
 //    vs1.set_contrast(64);
 //    vs2.set_contrast(32);
     int camnum1 = vs1.set_camnum();

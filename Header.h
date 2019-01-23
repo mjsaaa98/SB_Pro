@@ -13,9 +13,9 @@
 #include <thread>
 #include <mutex>
 #include <string.h>
-#define SHOW_DEBUG
+//#define SHOW_DEBUG
 //#define PRINT
-//#define OPEN_SERIAL
+#define OPEN_SERIAL
 
 #define BLUE_DETECT true
 #define RED_DETECT false

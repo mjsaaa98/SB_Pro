@@ -39,9 +39,15 @@ void stereo_vision::Init(const string &yaml){
   */
 void stereo_vision::get_location(vector<Point2f> &Left_Points, vector<Point2f> &Right_Points, vector<AbsPosition> &Result)
 {
+    vector<Index_and_Center> index_save_vec;
+    Index_and_Center index_save;
+    int  i;
 //    cout<<"::::"<<Left_Points[0].x<<endl<<Right_Points[0].x<<endl;
     auto sort_point = [](const Point &a1,const Point &a2){
         return a1.x < a2.x;
+    };
+    auto sort_point_index = [](const Index_and_Center &a1,const Index_and_Center &a2){
+        return a1.center.x < a2.center.x;
     };
 //    sort(Left_Points.begin(),Left_Points.end(),sort_point);
 //    sort(Right_Points.begin(),Right_Points.end(),sort_point);
@@ -51,7 +57,14 @@ void stereo_vision::get_location(vector<Point2f> &Left_Points, vector<Point2f> &
     vector<Point2f> left_distort_points,Right_distort_points;
     undistortPoints(Left_Points,left_distort_points,cameraMatrixL,distCoeffL,Rl,Pl);
     undistortPoints(Right_Points,Right_distort_points,cameraMatrixR,distCoeffR,Rr,Pr);
-    sort(left_distort_points.begin(),left_distort_points.end(),sort_point);
+    for(i=0;i<Left_Points.size();i++)
+    {
+        cout<<"in"<<endl;
+        index_save.center = left_distort_points[i];
+        index_save.index = i;
+        index_save_vec.push_back(index_save);
+    }
+    sort(index_save_vec.begin(),index_save_vec.end(),sort_point_index);
     sort(Right_distort_points.begin(),Right_distort_points.end(),sort_point);
 
     size_t Lsize = Left_Points.size();
@@ -59,7 +72,7 @@ void stereo_vision::get_location(vector<Point2f> &Left_Points, vector<Point2f> &
     cout<<"------矫正后的Y值-----------"<<endl;
     for (int i=0;i<Lsize;i++)
     {
-        cout<<"LY:"<<left_distort_points[i].x<<" "<<"RY:"<<Right_distort_points[i].x<<endl;
+        cout<<"LY:"<<left_distort_points[i].y<<" "<<"RY:"<<Right_distort_points[i].y<<endl;
     }
     cout<<"------结束-----------"<<endl;
 #endif
@@ -67,11 +80,12 @@ void stereo_vision::get_location(vector<Point2f> &Left_Points, vector<Point2f> &
 //    if(Lsize == Rsize)
 //    {
 //    cout<<"Lsize:"<<Lsize<<endl;
-        for(size_t i=0;i<Lsize;i++){
+        for(i=0;i<Lsize;i++){
+
             if(left_distort_points[i].x > Right_distort_points[i].x){
                 AbsPosition Pos;
                 double disp_x = left_distort_points[i].x - Right_distort_points[i].x;
-                Mat image_xyd = (Mat_<double>(4,1) << Left_Points[i].x,Left_Points[i].y,disp_x,1);
+                Mat image_xyd = (Mat_<double>(4,1) << index_save_vec[i].center.x,index_save_vec[i].center.y,disp_x,1);
                 Mat xyzw = (Mat_<double>(4,1) << 0,0,0,0);
                 xyzw = Q*image_xyd;
                 Pos.z = xyzw.at<double>(2,0)/xyzw.at<double>(3,0);
@@ -81,7 +95,7 @@ void stereo_vision::get_location(vector<Point2f> &Left_Points, vector<Point2f> &
                     Pos.x -= x_tranz;
                     Pos.y -= y_tranz;
                     Pos.z -= z_tranz;
-                    Pos.index = i;
+                    Pos.index = index_save_vec[i].index;
                     Result.push_back(Pos);
                 }
             }
@@ -92,4 +106,3 @@ void stereo_vision::get_location(vector<Point2f> &Left_Points, vector<Point2f> &
 
 //    }
 }
-

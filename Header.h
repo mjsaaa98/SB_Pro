@@ -57,6 +57,11 @@ typedef struct{
 }AbsPosition;
 
 typedef struct{
+    Point2f center;
+    int index;
+}Index_and_Center;
+
+typedef struct{
     Point armor_center = Point(0,0);
     float distance = 0.0;//mm
     Point2f armor_points[4] = {Point(0,0),Point(0,0),Point(0,0),Point(0,0)};

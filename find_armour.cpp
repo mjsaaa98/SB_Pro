@@ -176,16 +176,6 @@ void find_armour::get_armor(Mat& img,Mat& dst,int mode,bool Show_Left)
     }
     else
     {
-#ifdef SHOW_DEBUG
-        if(Show_Left)
-        {
-            cout<<"L_in"<<endl;
-        }
-        else
-        {
-            cout<<"R_in"<<endl;
-        }
-#endif
         //截取本帧图片，只对截图操作
         img_ROI = roi(img,LastArmor.armor_center,LastArmor.diameter);
         image_preprocess(mode,img_ROI,dst);  //图片预处理
@@ -193,9 +183,8 @@ void find_armour::get_armor(Mat& img,Mat& dst,int mode,bool Show_Left)
         //当前截图区域没找到，以半径扩展
         if(Armordatas.size()==0)
         {
-
             LastArmor.diameter = LastArmor.diameter*1.3;
-            if(x1==1||x2==img.cols-1||y1==1||y2==img.rows-1)
+            if(x1==1||x2==cols-1||y1==1||y2==rows-1)
             {
                 isROIflag = 0;
             }
@@ -281,6 +270,7 @@ void find_armour::src_get_armor()
     float y_dist,x_dist,min_h,height_d,K,x2h_rate,/*angle_diff,*/max_h;
     float angle_of_Rotated,height_of_Rotated;
     if(size==2){
+        bool Not_Armor = false;
         height1 = contours_para[0][0];
         x1 = contours_para[0][1];
         y1 = contours_para[0][2];
@@ -344,9 +334,14 @@ void find_armour::src_get_armor()
             float d=sqrt(pow(contours_para[0][1]-contours_para[1][1],2)
                     +pow(contours_para[0][2]-contours_para[1][2],2));
 //            float dh_rate = max(d/height1,d/height2);
-//            cout<<"angle::"<<angle1<<" "<<angle2<<endl;
+            cout<<"angle::"<<angle1<<" "<<angle2<<endl;
 //            cout<<"y_dist::"<<y_dist<<" "<<angle_d<<endl;
-            if(y_dist<0.4*(height1+height2)&&(angle_d<20||angle_d>=80)
+            float max_angle = max(angle1,angle2),min_angle = min(angle1,angle2);
+            if((60<max_angle&&max_angle<=80&&min_angle>4)||(max_angle>80&&max_angle<83&&min_angle>7))
+            {
+                Not_Armor = true;
+            }
+            if(Not_Armor==true&&y_dist<0.4*(height1+height2)&&(angle_d<20||angle_d>=80)
                    &&fabs(K)<0.5&&angle_of_Rotated<20&&area_rate<3.0&&x2h_rate>=0.8&&x2h_rate<=5&&/*dh_rate<4.5&&*/height_d<0.4*max_h)
             {
                 Armordata pushdata;
@@ -436,6 +431,12 @@ void find_armour::src_get_armor()
                     float d=sqrt(pow(contours_para[i][1]-contours_para[j][1],2)
                             +pow(contours_para[i][2]-contours_para[j][2],2));
 //                    float dh_rate = max(d/height1,d/height2);
+                    float max_angle = max(angle1,angle2),min_angle = min(angle1,angle2);
+                    if((60<max_angle&&max_angle<=80&&min_angle>4)||(max_angle>80&&max_angle<83&&min_angle>7))
+                    {
+                        continue;
+                    }
+                    cout<<"angle::"<<angle1<<" "<<angle2<<endl;
                     if(isROIflag==0)
                     {
 //                    cout<<"Rate::"<<x2h_rate<<" "<<fabs(K)<<" "<<endl;

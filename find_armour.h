@@ -85,6 +85,8 @@ private:
     //与截图有关的参数
     int last_mode;
     Mat img_ROI;
+    int cols = 1280;
+    int rows = 720;
 };
 
 #endif // FIND_ARMOUR_H

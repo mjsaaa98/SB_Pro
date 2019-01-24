@@ -58,14 +58,12 @@ void find_armour::clear_data()
 Mat find_armour::roi(Mat img,Point center,float d)
 {
     Mat roi;
-    int cols = img.cols;
-    int rows = img.rows;
     x1 = center.x-d*1;
     x2 = center.x+d*1;
     y1 = center.y-d*0.8;
     y2 = center.y+d*0.8;
     if(x1<=0) x1 = 1;
-    if(x2>cols) x2 = cols-1;
+    if(x2>=cols) x2 = cols-1;
     if(y1<=0) y1 = 1;
     if(y2>=rows) y2 = rows-1;
     roi = img(Range(y1,y2),Range(x1,x2));
@@ -315,8 +313,6 @@ void find_armour::src_get_armor()
 
         float angle_d = fabs(angle2-angle1);
         y_dist = fabs(y2-y1);
-        if(y1>y2) y_dist = y1-y2;
-        else y_dist = y2-y1;
         x_dist = x2-x1;
         min_h = min(height1,height2);
         max_h = max(height1,height2);
@@ -348,9 +344,9 @@ void find_armour::src_get_armor()
             float d=sqrt(pow(contours_para[0][1]-contours_para[1][1],2)
                     +pow(contours_para[0][2]-contours_para[1][2],2));
 //            float dh_rate = max(d/height1,d/height2);
-//            cout<<"angle::"<<angle1<<" "<<angle2<<"rate:"<<x2h_rate<<" "<<dh_rate<<" "<<height_d<<endl;
+//            cout<<"angle::"<<angle1<<" "<<angle2<<endl;
 //            cout<<"y_dist::"<<y_dist<<" "<<angle_d<<endl;
-            if(y_dist<0.4*(height1+height2)&&(angle_d<20||angle_d>50)
+            if(y_dist<0.4*(height1+height2)&&(angle_d<20||angle_d>=80)
                    &&fabs(K)<0.5&&angle_of_Rotated<20&&area_rate<3.0&&x2h_rate>=0.8&&x2h_rate<=5&&/*dh_rate<4.5&&*/height_d<0.4*max_h)
             {
                 Armordata pushdata;
@@ -367,7 +363,6 @@ void find_armour::src_get_armor()
                     pushdata.armor = big_armor;
                 }
                 Armordatas.push_back(pushdata);
-
             }
         }
     }
@@ -408,8 +403,6 @@ void find_armour::src_get_armor()
 
                 float angle_d = fabs(angle2-angle1);
                 y_dist = fabs(y2-y1);
-                if(y1>y2) y_dist = y1-y2;
-                else y_dist = y2-y1;
                 x_dist = x2-x1;
                 min_h = min(height1,height2);
                 max_h = max(height1,height2);
@@ -485,7 +478,7 @@ void find_armour::src_get_armor()
                             {
                                 pushdata.armor = big_armor;
                             }
-                            ArmorPoints.push_back(center);
+                            Armordatas.push_back(pushdata);
                         }
                     }
                 }

@@ -155,8 +155,9 @@ int main()
 
             Positions.clear();  //qingkong neicun
             if(Left_size == Right_size){
-                cout<<"Points pipei!!!!!!!!!!!!!!"<<endl;
+//                cout<<"Points pipei!!!!!!!!!!!!!!"<<endl;
                 Stereo.get_location(Left_Points,Right_Points,Positions);
+                if(Positions.size()==-1) continue;
                 small_dis_i = A_Predict.Predict(Positions);
 #ifdef SHOW_DEBUG
                 circle(L_frame,Left_Points[small_dis_i],40,Scalar(255,0,0),5);
@@ -178,7 +179,7 @@ int main()
                 {
                     for(i; i<=t+s ;i++)
                     {
-                        if(72<=abs((Left_Points[i].y-Right_Points[s].y))&&abs((Left_Points[i].y-Right_Points[s].y))<=87
+                        if(90<=abs((Left_Points[i].y-Right_Points[s].y))&&abs((Left_Points[i].y-Right_Points[s].y))<=100
                                 /*&&250<=Left_Points[i].x-Right_Points[s].x&&Left_Points[i].x-Right_Points[s].x<=280*/)
                         {
                             temp.push_back(Left_Points[i]);
@@ -200,12 +201,12 @@ int main()
                 if(Left_size == Right_size){
                     cout<<"选点成功！"<<endl;
                     Stereo.get_location(Left_Points,Right_Points,Positions);
+                    if(Positions.size()==-1) continue;
                     small_dis_i = A_Predict.Predict(Positions);
     #ifdef SHOW_DEBUG
                     circle(L_frame,Left_Points[small_dis_i],40,Scalar(255,0,0),5);
                     circle(R_frame,Right_Points[small_dis_i],40,Scalar(255,0,0),5);
     #endif
-    //                cout<<"Left:"<<Left_Points[small_dis_i].x<<endl<<"Right:"<<Right_Points[small_dis_i].x<<endl;
                     cout<<"LeftYYYY:"<<Left_Points[small_dis_i].y<<endl<<"Right:"<<Right_Points[small_dis_i].y<<endl;
                     L_find_armour.LastArmor = Left_Armordata[A_Predict.Result.index];
                     R_find_armour.LastArmor = Right_Armordata[A_Predict.Result.index];
@@ -248,15 +249,13 @@ int main()
                 if(Left_size == Right_size){
                     cout<<"选点成功！"<<endl;
                     Stereo.get_location(Left_Points,Right_Points,Positions);
+                    if(Positions.size()==-1) continue;
                     small_dis_i = A_Predict.Predict(Positions);
     #ifdef SHOW_DEBUG
                     circle(L_frame,Left_Points[small_dis_i],40,Scalar(255,0,0),5);
                     circle(R_frame,Right_Points[small_dis_i],40,Scalar(255,0,0),5);
     #endif
-    //                putText(L_frame,string(Left_Points[small_dis_i].x),Left_Points[small_dis_i],FONT_HERSHEY_SIMPLEX,3,Scalar(255,255,255));
-    //                putText(R_frame,string(Right_Points[small_dis_i].x),Right_Points[small_dis_i],FONT_HERSHEY_SIMPLEX,3,Scalar(255,255,255));
-    //                cout<<"Left:"<<Left_Points[small_dis_i].x<<endl<<"Right:"<<Right_Points[small_dis_i].x<<endl;
-//                    cout<<"LeftYYYY:"<<Left_Points[small_dis_i].y<<endl<<"Right:"<<Right_Points[small_dis_i].y<<endl;
+                    cout<<"Left_Pipei_YYYY:"<<Left_Points[small_dis_i].y<<endl<<"Right:"<<Right_Points[small_dis_i].y<<endl;
                     L_find_armour.LastArmor = Left_Armordata[A_Predict.Result.index];
                     R_find_armour.LastArmor = Right_Armordata[A_Predict.Result.index];
                     L_find_armour.isROIflag = 1;

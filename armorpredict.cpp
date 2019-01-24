@@ -14,36 +14,27 @@ void ArmorPredict::Fresh()
 int ArmorPredict::Predict(vector<AbsPosition> Positions){
     Fresh();
     int k=0;
-    if(Positions.size() != 0){
-//        if(Positions.size() != 1){
-//            sort(Positions.begin(),Positions.end(),PosSort);
-//        }
-        if(Positions.size() > 1){
-            cout<<"dis:"<<Positions[k].z<<endl;
-            for(int i=0;i<Positions.size()-1;i++)
-            {
-                cout<<"dis(i):"<<Positions[i+1].z<<endl;
-                if(Positions[k].z>Positions[i+1].z)
-                    k = i+1;
-            }
-            Result = Positions[k];
-            cout<<"min_dis:"<<Positions[k].z<<endl;
-        }else{
-            Result = Positions[0];
+    if(Positions.size() > 1){
+        for(int i=0;i<Positions.size()-1;i++)
+        {
+            if(Positions[k].z>Positions[i+1].z)
+                k = i+1;
         }
-
-        if(Result.z < 30){
-            yaw_out = 0;
-            pitch_out = 0;
-        }else{
-            AngleFit(Result);
-        }
-        Vision = {yaw_out,pitch_out,Result.z,0,1};
-        OldPositions = Positions;
-        OldResult = Result;
+        Result = Positions[k];
+    }else{
+        Result = Positions[0];
     }
-        return k;
-}
+
+    if(Result.z < 30){
+        yaw_out = 0;
+        pitch_out = 0;
+    }else{
+        AngleFit(Result);
+    }
+    Vision = {yaw_out,pitch_out,Result.z,0,1};
+    OldPositions = Positions;
+    OldResult = Result;
+    return k;    }
 
 void ArmorPredict::AngleFit( AbsPosition& input){
     float flytime,gravity_offset;

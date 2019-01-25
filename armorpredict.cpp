@@ -34,7 +34,8 @@ int ArmorPredict::Predict(vector<AbsPosition> Positions){
     Vision = {yaw_out,pitch_out,Result.z,0,1};
     OldPositions = Positions;
     OldResult = Result;
-    return k;    }
+    return k;
+}
 
 void ArmorPredict::AngleFit( AbsPosition& input){
     float flytime,gravity_offset;

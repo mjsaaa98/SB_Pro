@@ -10,7 +10,11 @@
 FileStorage fs("./../SB_Pro/canshu.yaml",FileStorage::READ);
 void Read_Img(VideoCapture &cap, Mat &src)
 {
+    QTime time;
+    time.start();
     cap >> src;
+    cout<<"time_read:"<<time.elapsed()<<"ms"<<endl;
+
 }
 int main()
 {
@@ -68,6 +72,7 @@ int main()
     cout << "摄像机打开完成" << endl;
 
 /// =======================================chushihuawancheng=================================
+    AngleSolver Left_PnP,Right_PnP;
     stereo_vision Stereo;
     FileStorage stereo_yaml("/home/s305-nuc5/Downloads/build-SB_Pro-Desktop-Debug/camera_calibrate.yaml",FileStorage::READ);
     Mat L_camera_matrix,R_camera_matrix,L_dist_matrix,R_dist_matrix;
@@ -75,13 +80,12 @@ int main()
     stereo_yaml["cameraMatrixR"] >> R_camera_matrix;
     stereo_yaml["distCoeffL"] >> L_dist_matrix;
     stereo_yaml["distCoeffR"] >> R_dist_matrix;
-/// ==================================初始化单目（默认为小装甲）==================================
-//     AngleSolver Left_PnP,Right_PnP;
-//    Left_PnP.Init(L_camera_matrix,L_dist_matrix,13.5,6.5);
-//    Right_PnP.Init(R_camera_matrix,R_dist_matrix,13.5,6.5);
-//    Left_PnP.set_Axis(110,110,90);
-//    Right_PnP.set_Axis(110,110,90);
-/// ==================================初始化双目===============================================
+    //chushihua wei xiaozhuangjiaban
+    Left_PnP.Init(L_camera_matrix,L_dist_matrix,13.5,6.5);
+    Right_PnP.Init(R_camera_matrix,R_dist_matrix,13.5,6.5);
+    Left_PnP.set_Axis(110,110,90);
+    Right_PnP.set_Axis(110,110,90);
+    //chushihau shuangmu
     Stereo.setAxis(90,35,20);
 
     find_armour L_find_armour,R_find_armour;
@@ -99,20 +103,20 @@ int main()
 #endif
     while(camstatus[0] && camstatus[1])
     {
+//        QTime time;
+//        time.start();
         std::thread L_read(Read_Img,ref(cap_left),ref(L_frame));
         std::thread R_read(Read_Img,ref(cap_right),ref(R_frame));
         L_read.join();
         R_read.join();
+//        cout<<"L_time_read:"<<time.elapsed()<<"ms"<<endl;
+
 #ifdef SHOW_DEBUG
         QTime time;
         time.start();
 #endif
 #ifdef OPEN_SERIAL
 //        sp.get_Mode(mode);
-//        while(mode==-1)
-//        {
-//            sp.get_Mode(mode);
-//        }
 #endif
         Mat L_dst,R_dst;
 //        thread L_get_armor(&find_armour::get_armor,&L_find_armour,ref(L_frame),ref(L_dst),mode,true);
@@ -170,13 +174,24 @@ int main()
 #endif
                 L_find_armour.LastArmor = Left_Armordata[A_Predict.Result.index];
                 R_find_armour.LastArmor = Right_Armordata[A_Predict.Result.index];
+//#ifdef SHOW_DEBUG
+
+//                cout<<"Index"<<A_Predict.Result.index<<" "<<"size:"<<Left_Armordata.size()<<endl;
+//                cout<<"LCenter"<<L_find_armour.LastArmor.armor_center<<" "<<"R_center"<<R_find_armour.LastArmor.armor_center<<endl;
+//#endif
                 L_find_armour.isROIflag = 1;
                 R_find_armour.isROIflag = 1;
             }
+//            else {
+//                memset(&A_Predict.Vision,0,sizeof(VisionData));
+
+//            }
+//            cout<<"---------------------------over-------------------------------------------"<<endl;
+
             else if(Left_size>Right_size)
             {
-#ifdef SHOW_DEBUG
-                cout<<"左边点多，开始选点！"<<end
+                cout<<"左边点多，开始选点！"<<endl;
+
                 for (int i = 0;i<Left_size;i++)
                 {
                     cout<<"L_Y:"<<Left_Points[i]<<" ";
@@ -187,8 +202,7 @@ int main()
                     cout<<"R_Y:"<<Right_Points[i]<<" ";
                 }
                 cout<<endl;
-                l;
-#endif
+
                 size_t t = Left_size-Right_size;
                 int i=0,j,s;
                 vector<Point2f> temp;
@@ -199,7 +213,6 @@ int main()
                     {
                         cout<<"here"<<endl;
                         if(100<=abs((Left_Points[i].y-Right_Points[s].y))&&abs((Left_Points[i].y-Right_Points[s].y))<=110
-                                &&Left_Points[i].x>Right_Points[s].x
                                 /*&&250<=Left_Points[i].x-Right_Points[s].x&&Left_Points[i].x-Right_Points[s].x<=280*/)
                         {
                             cout<<"in"<<endl;
@@ -253,7 +266,6 @@ int main()
                     for(i; i<=t+s ;i++)
                     {
                         if(100<=abs((Left_Points[s].y-Right_Points[i].y))&&abs((Left_Points[s].y-Right_Points[i].y))<=110
-                                &&Left_Points[i].x>Right_Points[s].x
                                 /*&&250<=(Left_Points[s].x-Right_Points[i].x)&&(Left_Points[s].x-Right_Points[i].x)<=280*/)
                         {
                             cout<<"Y最短距离"<<abs((Left_Points[s].y-Right_Points[i].y))<<endl;

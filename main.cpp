@@ -27,9 +27,9 @@ int main()
     int fd2 = open("/dev/video1",O_RDWR);
     v4l2_set vs1(fd1),vs2(fd2);
     vs1.set_saturation(128);      //饱和度
-    vs1.set_exposure(15);     //曝光
+    vs1.set_exposure(22);     //曝光
     vs2.set_saturation(128);      //饱和度
-    vs2.set_exposure(15);     //曝光
+    vs2.set_exposure(22);     //曝光
 //    vs1.set_contrast(64);
 //    vs2.set_contrast(32);
     int camnum1 = vs1.set_camnum();
@@ -110,21 +110,22 @@ int main()
     }
     while(1)
     {
-#ifdef PRINT
-        QTime time;
-        time.start();
-#endif
+//#ifdef PRINT
+//        QTime time;
+//        time.start();
+//#endif
         std::thread L_read(Read_Img,ref(cap_left),ref(L_frame));
         std::thread R_read(Read_Img,ref(cap_right),ref(R_frame));
         L_read.join();
         R_read.join();
-#if PRINT
-        cout<<"L_time_read:"<<time.elapsed()<<"ms"<<endl;
-#endif
+//#if PRINT
+//        cout<<"L_time_read:"<<time.elapsed()<<"ms"<<endl;
+//#endif
 
-#ifdef OPEN_SERIAL
+//#ifdef OPEN_SERIAL
 //        sp.get_Mode(mode);
-#endif
+//#endif
+
         Mat L_dst,R_dst;
 //        thread L_get_armor(&find_armour::get_armor,&L_find_armour,ref(L_frame),ref(L_dst),mode,true);
 //        thread R_get_armor(&find_armour::get_armor,&L_find_armour,ref(R_frame),ref(R_dst),mode,false);
@@ -140,6 +141,8 @@ int main()
 
         size_t Left_size = Left_Points.size();
         size_t Right_size = Right_Points.size();
+
+//        cout<<"Size:::::::::::::::::::::::::::"<<Left_size<<" "<<Right_size<<endl;
 #ifdef PRINT
         cout<<"Left_size&Right_size:"<<Left_size<<"    "<<Right_size<<endl;
         for(size_t i=0;i<Left_Points.size();i++){
@@ -168,7 +171,7 @@ int main()
             }
 #endif
 
-            Positions.clear();  //qingkong neicun
+            Positions.clear();  //清空容器
             if(Left_size == Right_size){
 //                cout<<"Points pipei!!!!!!!!!!!!!!"<<endl;
                 Stereo.get_location(Left_Points,Right_Points,Positions);
@@ -177,14 +180,13 @@ int main()
 #ifdef SHOW_DEBUG
                 circle(L_frame,Left_Points[small_dis_i],40,Scalar(255,0,0),5);
                 circle(R_frame,Right_Points[small_dis_i],40,Scalar(255,0,0),5);
-#endif
+#endif  //SHOW_DEBUG
                 L_find_armour.LastArmor = Left_Armordata[A_Predict.Result.index];
                 R_find_armour.LastArmor = Right_Armordata[A_Predict.Result.index];
-#ifdef SHOW_DEBUG
 
-                cout<<"Index"<<A_Predict.Result.index<<" "<<"size:"<<Left_Armordata.size()<<endl;
+#ifdef RRINT
                 cout<<"LCenter"<<L_find_armour.LastArmor.armor_center<<" "<<"R_center"<<R_find_armour.LastArmor.armor_center<<endl;
-#endif
+#endif  //PRINT
                 L_find_armour.isROIflag = 1;
                 R_find_armour.isROIflag = 1;
             }
@@ -330,9 +332,9 @@ int main()
         sprintf(screen_data,"dis:%fm",A_Predict.Vision.dis.f/1000);
         putText(L_frame,screen_data,Point(100,100),1,5,Scalar(255,255,255));
         imshow("LEFT_img",L_frame);
-        imshow("LEFT_dst",L_dst);
+//        imshow("LEFT_dst",L_dst);
         imshow("RIGHT_img",R_frame);
-        imshow("RIGHT_dst",R_dst);
+//        imshow("RIGHT_dst",R_dst);
 #endif
 #ifdef OPEN_SERIAL
         sp.TransformData(A_Predict.Vision);

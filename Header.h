@@ -13,7 +13,7 @@
 #include <thread>
 #include <mutex>
 #include <string.h>
-//#define SHOW_DEBUG
+#define SHOW_DEBUG
 //#define PRINT
 #define OPEN_SERIAL
 #define CAFFE_BIN

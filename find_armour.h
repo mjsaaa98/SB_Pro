@@ -55,14 +55,16 @@ class find_armour
 {
 public:
     find_armour();
+    int Armor_Bin(Mat input1);
     Mat roi(Mat,Point,float);
+    Mat roi2bin(Mat img,Point center,float d,float h);
     float Point_Angle(const Point2f &p1,const Point2f &p2){
         return fabs(atan2(p2.y-p1.y,p2.x-p1.x)*180.0/CV_PI);
     }
     void image_preprocess(int mode,Mat src,Mat &);
     void search_armour(Mat&img,Mat&dst);
     void get_Light();
-    void src_get_armor();
+    void src_get_armor(Mat &img);
     void get_armor(Mat& image,Mat &dst,int mode,bool Show_Left);
 public:
     int isfind;

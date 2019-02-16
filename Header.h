@@ -16,7 +16,7 @@
 //#define SHOW_DEBUG
 //#define PRINT
 #define OPEN_SERIAL
-
+#define CAFFE_BIN
 #define BLUE_DETECT true
 #define RED_DETECT false
 

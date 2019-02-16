@@ -18,7 +18,28 @@ find_armour::find_armour()
     Clear();
     clear_data();
 }
-
+/**
+ * @brief find_armour::Armor_Bin  二分类
+ * @param input1
+ * @return
+ */
+int find_armour::Armor_Bin(Mat input1)
+{
+    vector<Mat> channels;
+    dnn::Net net = dnn::readNetFromCaffe("/home/mjs/下载/armor_binary-master/deploy.prototxt", "/home/mjs/下载/armor_binary-master/armornet_iter_200000.caffemodel");
+    split(input1, channels);
+    Mat inputBlob = dnn::blobFromImage(channels[1], 0.00390625f, Size(28, 28), Scalar(), false);
+    Mat prob;
+    net.setInput(inputBlob, "data");
+    prob = net.forward("prob");
+    int classId;
+    double classProb;
+    Mat probMat = prob.reshape(1, 1);
+    Point classNumber;
+    minMaxLoc(probMat, NULL, &classProb, NULL, &classNumber);
+    classId = classNumber.x;    // 类别：0是45度，1是装甲板
+    return classId;
+}
 /**
  * @brief find_armour::Clear  清空所有数据
  */
@@ -69,8 +90,31 @@ Mat find_armour::roi(Mat img,Point center,float d)
     roi = img(Range(y1,y2),Range(x1,x2));
     return roi;
 }
-
-
+/**
+ * @brief find_armour::roi2bin
+ * @param img
+ * @param center
+ * @param d
+ * @param h
+ * @return
+ */
+Mat find_armour::roi2bin(Mat img,Point center,float d,float h)
+{
+    Mat roi;
+    float x1,x2,y1,y2;
+    int cols = img.cols;
+    int rows = img.rows;
+    x1 = center.x-d*0.35;
+    x2 = center.x+d*0.35;
+    y1 = center.y-h*0.7;
+    y2 = center.y+h*0.7;
+    if(x1<=0) x1 = 1;
+    if(x2>cols) x2 = cols-1;
+    if(y1<=0) y1 = 1;
+    if(y2>=rows) y2 = rows-1;
+    roi = img(Range(y1,y2),Range(x1,x2));
+    return roi;
+}
 
 /**
  * @brief find_armour::image_preprocess  图像预处理
@@ -166,15 +210,8 @@ void find_armour::image_preprocess(int mode,Mat src,Mat &dst)
  */
 void find_armour::get_armor(Mat& img,Mat& dst,int mode,bool Show_Left)
 {
+//    Mat img = image.clone();
     Clear();
-//    if(Show_Left)
-//    {
-//        cout<<"L_in"<<endl;
-//    }
-//    else
-//    {
-//        cout<<"R_in"<<endl;
-//    }
     //判断是否切换命令了
     if(isROIflag==0)
     {
@@ -184,21 +221,27 @@ void find_armour::get_armor(Mat& img,Mat& dst,int mode,bool Show_Left)
     }
     else
     {
-
         //截取本帧图片，只对截图操作
-        img_ROI = roi(img,LastArmor.armor_center,LastArmor.diameter);
+        Mat img_ROI = roi(img,LastArmor.armor_center,LastArmor.diameter);
         image_preprocess(mode,img_ROI,dst);  //图片预处理
-        search_armour(img,dst);
-        //当前截图区域没找到，以半径扩展
-        if(Armordatas.size()==0)
-        {
-
-            LastArmor.diameter = LastArmor.diameter*1.3;
-            if(x1==1||x2==img.cols-1||y1==1||y2==img.rows-1)
-            {
-                isROIflag = 0;
-            }
-        }
+        search_armour(img_ROI,dst);
+//        //当前截图区域没找到，以半径扩展
+//        if(Armordatas.size()==0)
+//        {
+////            if(Show_Left)
+////            {
+////                cout<<"L_in"<<endl;
+////            }
+////            else
+////            {
+////                cout<<"R_in"<<endl;
+////            }
+//            LastArmor.diameter = LastArmor.diameter*1.3;
+//            if(x1==1||x2==img.cols-1||y1==1||y2==img.rows-1)
+//            {
+//                isROIflag = 0;
+//            }
+//        }
     }
 }
 
@@ -264,7 +307,7 @@ void find_armour::get_Light()
 /**
  * @brief find_armour::src_get_armor  在原图（截图）中找装甲板
  */
-void find_armour::src_get_armor()
+void find_armour::src_get_armor(Mat &img)
 {
     int size = result_armor.size();
     if(size < 2){
@@ -272,6 +315,7 @@ void find_armour::src_get_armor()
     }
     Point2f center_point1,center_point2;
     Point2f _pt[4],pt[4];
+    int isArmor = 1;
     float height1,height2;
     float angle1,angle2;
     float area1,area2,area_rate;
@@ -346,13 +390,21 @@ void find_armour::src_get_armor()
             float dh_rate = max(d/height1,d/height2);
 //            cout<<"angle::"<<angle1<<" "<<angle2<<endl;
 //            cout<<"dh_rate::"<<dh_rate<<endl;
-            if(y_dist<=0.4*(height1+height2)&&(angle_d<6||angle_d>84)&&((x2h_rate>=0.5&&x2h_rate<=2.5)||(x2h_rate>=3.5&&x2h_rate<4.5))&&area_rate<2)
+            Point center=Point2f((x1+x2)*0.5,(y1+y2)*0.5);
+#ifdef CAFFE_BIN
+            Mat Roi = roi2bin(img,center,d,height_of_Rotated);
+
+#ifdef SHOW_DEBUG
+            imshow("ROI",Roi);
+#endif
+            isArmor = Armor_Bin(Roi.clone());
+#endif
+            if(isArmor==1&&y_dist<=0.4*(height1+height2)&&(angle_d<6||angle_d>84)&&((x2h_rate>=0.5&&x2h_rate<=2.5)||(x2h_rate>=3.5&&x2h_rate<4.5))&&area_rate<2)
             {
 #ifdef SHOW_DEBUG
                 cout<<"FIR_IN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
 #endif
                 Armordata pushdata;
-                Point center=Point2f((x1+x2)*0.5,(y1+y2)*0.5);
                 pushdata.armor_points[0] = pt[0];
                 pushdata.armor_points[1] = pt[1];
                 pushdata.armor_points[2] = pt[2];
@@ -366,12 +418,11 @@ void find_armour::src_get_armor()
                 }
                 Armordatas.push_back(pushdata);
             }
-            else if(y_dist<0.4*(height1+height2)&&(angle_d<12||angle_d>=80)
+            else if(isArmor==1&&y_dist<0.4*(height1+height2)&&(angle_d<12||angle_d>=80)
                    &&fabs(K)<0.5&&angle_of_Rotated<20&&area_rate<3.0&&x2h_rate>=0.8&&x2h_rate<=5&&dh_rate<5&&height_d<0.4*max_h)
             {
 //                cout<<"2--IN!!!!!!!!!!!!!!!!!!!!!!!!!!"<<x2h_rate<<endl;
                 Armordata pushdata;
-                Point center=Point2f((x1+x2)*0.5,(y1+y2)*0.5);
                 pushdata.armor_points[0] = pt[0];
                 pushdata.armor_points[1] = pt[1];
                 pushdata.armor_points[2] = pt[2];
@@ -384,11 +435,11 @@ void find_armour::src_get_armor()
                     pushdata.armor = big_armor;
                 }
                 Armordatas.push_back(pushdata);
-
             }
         }
     }
     else if(size>=3){
+        cout<<"多！"<<endl;
         for(int i=0;i<size-1;i++)
         {
             height1 = contours_para[i][0];
@@ -463,7 +514,16 @@ void find_armour::src_get_armor()
                     float dh_rate = max(d/height1,d/height2);
 //                    cout<<"angle::"<<angle1<<" "<<angle2<<endl;
 //                    cout<<"dh_rate::"<<dh_rate<<endl;
-                    if((60<max_angle&&max_angle<=80&&min_angle>4)||(max_angle>83&&max_angle<88&&min_angle>6)||(max_angle>=80&&max_angle<=83&&min_angle>=9))
+                    Point center=Point2f((x1+x2)*0.5,(y1+y2)*0.5);
+#ifdef CAFFE_BIN
+                    Mat Roi = roi2bin(img,center,d,height_of_Rotated);
+
+#ifdef SHOW_DEBUG
+                    imshow("ROI",Roi);
+#endif
+                    isArmor = Armor_Bin(Roi.clone());
+#endif
+                    if(isArmor==1&&(60<max_angle&&max_angle<=80&&min_angle>4)||(max_angle>83&&max_angle<88&&min_angle>6)||(max_angle>=80&&max_angle<=83&&min_angle>=9))
                     {
                         continue;
                     }
@@ -472,13 +532,12 @@ void find_armour::src_get_armor()
 //                    cout<<"Rate::"<<x2h_rate<<" "<<fabs(K)<<" "<<endl;
 //                    cout<<"IN?"<<endl;
 //                        cout<<"Rate::"<<x2h_rate<<" "<<fabs(K)<<" "<<endl;
-                        if(y_dist<=0.4*(height1+height2)&&(angle_d<6||angle_d>84)&&((x2h_rate>=0.5&&x2h_rate<=2.5)||(x2h_rate>=3.5&&x2h_rate<4.5))&&area_rate<2)
+                        if(isArmor==1&&y_dist<=0.4*(height1+height2)&&(angle_d<6||angle_d>84)&&((x2h_rate>=0.5&&x2h_rate<=2.5)||(x2h_rate>=3.5&&x2h_rate<4.5))&&area_rate<2)
                         {
 #ifdef SHOW_DEBUG
                 cout<<"FIR_IN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
 #endif
                             Armordata pushdata;
-                            Point center=Point2f((x1+x2)*0.5,(y1+y2)*0.5);
                             pushdata.armor_points[0] = pt[0];
                             pushdata.armor_points[1] = pt[1];
                             pushdata.armor_points[2] = pt[2];
@@ -492,12 +551,11 @@ void find_armour::src_get_armor()
                             }
                             Armordatas.push_back(pushdata);
                         }
-                        else if(y_dist<=0.4*(height1+height2)&&(angle_d<20||angle_d>60)
+                        else if(isArmor==1&&y_dist<=0.4*(height1+height2)&&(angle_d<20||angle_d>60)
                                &&fabs(K)<0.4&&angle_of_Rotated<30&&area_rate<3.0&&x2h_rate>=0.8&&x2h_rate<=4.5&&dh_rate<5&&height_d<0.45*(height1+height2))
                         {
 //                            cout<<"dst_IN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
                             Armordata pushdata;
-                            Point center=Point2f((x1+x2)*0.5,(y1+y2)*0.5);
                             pushdata.armor_points[0] = pt[0];
                             pushdata.armor_points[1] = pt[1];
                             pushdata.armor_points[2] = pt[2];
@@ -514,13 +572,12 @@ void find_armour::src_get_armor()
                     }
                     else
                     {//size>3+截图
-                        if(y_dist<=0.4*(height1+height2)&&(angle_d<6||angle_d>84)&&((x2h_rate>=0.5&&x2h_rate<=2.5)||(x2h_rate>=3.5&&x2h_rate<4.5))&&area_rate<2)
+                        if(isArmor==1&&y_dist<=0.4*(height1+height2)&&(angle_d<6||angle_d>84)&&((x2h_rate>=0.5&&x2h_rate<=2.5)||(x2h_rate>=3.5&&x2h_rate<4.5))&&area_rate<2)
                         {
 #ifdef SHOW_DEBUG
                 cout<<"FIR_IN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
 #endif
                             Armordata pushdata;
-                            Point center=Point2f((x1+x2)*0.5,(y1+y2)*0.5);
                             pushdata.armor_points[0] = pt[0];
                             pushdata.armor_points[1] = pt[1];
                             pushdata.armor_points[2] = pt[2];
@@ -534,12 +591,11 @@ void find_armour::src_get_armor()
                             }
                             Armordatas.push_back(pushdata);
                         }
-                        else if(y_dist<0.45*(height1+height2)
+                        else if(isArmor==1&&y_dist<0.45*(height1+height2)
                                &&fabs(K)<0.5&&angle_of_Rotated<20&&area_rate<3.5&&x2h_rate>=0.8&&x2h_rate<=4.5&&dh_rate<5&&height_d<0.5*max_h)
                         {
 //                            cout<<"ROI_IN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
                             Armordata pushdata;
-                            Point center=Point2f((x1+x2)*0.5,(y1+y2)*0.5);
                             pushdata.armor_points[0] = pt[0];
                             pushdata.armor_points[1] = pt[1];
                             pushdata.armor_points[2] = pt[2];
@@ -572,9 +628,8 @@ void find_armour::src_get_armor()
  */
 void find_armour::search_armour(Mat &img,Mat &dst)
 {
+    if (isROIflag!=0)   cout<<"img.cols:"<<img.cols<<"/t"<<"img.rows:"<<img.rows<<endl;
     vector<vector<Point> > contours;
-
-    //findcontuors最后一个参数是偏移量，对于截图来说，巨好用
     findContours(dst,contours,CV_RETR_EXTERNAL,CV_CHAIN_APPROX_SIMPLE,Point(x1,y1));
 
     int num = contours.size();   //contour's amount
@@ -603,24 +658,24 @@ void find_armour::search_armour(Mat &img,Mat &dst)
         }
     }
     num = fir_armor.size();
-    if(num>=4){
-        //灯柱数量大于等于4,去掉最小矩形。
-        list<float> fir_armor_areas;
-        for(int i = 0;i<num;i++)
-        {
-            fir_armor_areas.push_back(fir_armor[i].size.width*fir_armor[i].size.width);
-        }
-        fir_armor_areas.sort();
-        fir_armor_areas.pop_front();
-        while(fir_armor_areas.front()>fir_armor_areas.back()*10)
-        {
+//    if(num>=4){
+//        //灯柱数量大于等于4,去掉最小矩形。
+//        list<float> fir_armor_areas;
+//        for(int i = 0;i<num;i++)
+//        {
+//            fir_armor_areas.push_back(fir_armor[i].size.width*fir_armor[i].size.width);
+//        }
+//        fir_armor_areas.sort();
+//        fir_armor_areas.pop_front();
+//        while(fir_armor_areas.front()>fir_armor_areas.back()*10)
+//        {
 //            cout<<"去掉小矩形"<<endl;
-            fir_armor_areas.pop_back();  //去掉小面积
-        }
-    }
+//            fir_armor_areas.pop_back();  //去掉小面积
+//        }
+//    }
     sort(fir_armor.begin(),fir_armor.end(),Sort_RotatedRect);
     get_Light();
 //    cout<<result_armor.size()<<endl;
     sort(result_armor.begin(),result_armor.end(),Sort_RotatedRect);
-    src_get_armor();
+    src_get_armor(img);
 }

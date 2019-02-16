@@ -121,9 +121,9 @@ Mat find_armour::roi2bin(Mat img,Point center,float d,float h)
     if(_x2>cols) _x2 = cols-1;
     if(_y1<=0) _y1 = 1;
     if(_y2>=rows) _y2 = rows-1;
-    cout<<"img:"<<cols<<" "<<rows<<endl;
-    cout<<"center:"<<center<<endl;
-    cout<<"BIN_ROI:"<<x1<<" "<<x2<<" "<<y1<<" "<<y2<<endl;
+//    cout<<"img:"<<cols<<" "<<rows<<endl;
+//    cout<<"center:"<<center<<endl;
+//    cout<<"BIN_ROI:"<<x1<<" "<<x2<<" "<<y1<<" "<<y2<<endl;
     roi = img(Range(_y1,_y2),Range(_x1,_x2));
     return roi;
 }
@@ -237,27 +237,16 @@ void find_armour::get_armor(Mat& img,Mat& dst,int mode,bool Show_Left)
         Mat img_ROI = roi(img,LastArmor.armor_center,LastArmor.diameter);
         image_preprocess(mode,img_ROI,dst);  //图片预处理
         search_armour(img_ROI,dst);
-
-
-        isROIflag = 0;
-
-//        //当前截图区域没找到，以半径扩展
-//        if(Armordatas.size()==0)
-//        {
-////            if(Show_Left)
-////            {
-////                cout<<"L_in"<<endl;
-////            }
-////            else
-////            {
-////                cout<<"R_in"<<endl;
-////            }
-//            LastArmor.diameter = LastArmor.diameter*1.3;
-//            if(x1==1||x2==img.cols-1||y1==1||y2==img.rows-1)
-//            {
-//                isROIflag = 0;
-//            }
-//        }
+//        isROIflag = 0;
+        //当前截图区域没找到，以半径扩展
+        if(Armordatas.size()==0)
+        {
+            LastArmor.diameter = LastArmor.diameter*1.3;
+            if(x1==1||x2==img.cols-1||y1==1||y2==img.rows-1)
+            {
+                isROIflag = 0;
+            }
+        }
     }
 }
 
@@ -411,10 +400,6 @@ void find_armour::src_get_armor(Mat &img)
             {
 #ifdef CAFFE_BIN
                 Mat Roi = roi2bin(img,center,d,height_of_Rotated);
-
-#ifdef SHOW_DEBUG
-                imshow("ROI",Roi);
-#endif  //SHOW_DEBUG
                 isArmor = Armor_Bin(Roi.clone());
 #endif  //CAFFE_BIN
                 if(isArmor==1){
@@ -525,12 +510,7 @@ void find_armour::src_get_armor(Mat &img)
                         {
 #ifdef CAFFE_BIN
                             Mat Roi = roi2bin(img,center,d,height_of_Rotated);
-
-#ifdef SHOW_DEBUG
-                            imshow("ROI",Roi);
-#endif   //SHOW_DEBUG
                             isArmor = Armor_Bin(Roi.clone());
-                            cout<<"Not_ROI==================================="<<isArmor<<endl;
 #endif   //CAFFE_BIN
                             if(isArmor==1)
                             {
@@ -556,12 +536,7 @@ void find_armour::src_get_armor(Mat &img)
                         {
 #ifdef CAFFE_BIN
                             Mat Roi = roi2bin(img,center,d,height_of_Rotated);
-
-#ifdef SHOW_DEBUG
-                            imshow("ROI",Roi);
-#endif   //SHOW_DEBUG
                             isArmor = Armor_Bin(Roi.clone());
-                            cout<<"Not_ROI==================================="<<isArmor<<endl;
 #endif   //CAFFE_BIN
                             if(isArmor==1)
                             {
@@ -618,7 +593,7 @@ void find_armour::src_get_armor(Mat &img)
  */
 void find_armour::search_armour(Mat &img,Mat &dst)
 {
-    cout<<isROIflag<<"-----------------------------------------------------"<<endl;
+//    cout<<isROIflag<<"-----------------------------------------------------"<<endl;
     vector<vector<Point> > contours;
     findContours(dst,contours,CV_RETR_EXTERNAL,CV_CHAIN_APPROX_SIMPLE,Point(x1,y1));
 

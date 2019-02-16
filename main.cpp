@@ -10,11 +10,7 @@
 FileStorage fs("./../SB_Pro/canshu.yaml",FileStorage::READ);
 void Read_Img(VideoCapture &cap, Mat &src)
 {
-//    QTime time;
-//    time.start();
     cap >> src;
-//    cout<<"time_read:"<<time.elapsed()<<"ms"<<endl;
-
 }
 int main()
 {
@@ -110,29 +106,27 @@ int main()
     }
     while(1)
     {
-//#ifdef PRINT
-//        QTime time;
-//        time.start();
-//#endif
+
         std::thread L_read(Read_Img,ref(cap_left),ref(L_frame));
         std::thread R_read(Read_Img,ref(cap_right),ref(R_frame));
         L_read.join();
         R_read.join();
-//#if PRINT
-//        cout<<"L_time_read:"<<time.elapsed()<<"ms"<<endl;
-//#endif
-
 //#ifdef OPEN_SERIAL
 //        sp.get_Mode(mode);
 //#endif
-
+//        QTime time;
+//        time.start();
         Mat L_dst,R_dst;
-//        thread L_get_armor(&find_armour::get_armor,&L_find_armour,ref(L_frame),ref(L_dst),mode,true);
-//        thread R_get_armor(&find_armour::get_armor,&L_find_armour,ref(R_frame),ref(R_dst),mode,false);
-//        L_get_armor.join();
-//        R_get_armor.join();
-        L_find_armour.get_armor(L_frame,L_dst,mode,true);
-        R_find_armour.get_armor(R_frame,R_dst,mode,false);
+        //用两个线程识别左右图像
+        thread L_get_armor(&find_armour::get_armor,&L_find_armour,ref(L_frame),ref(L_dst),mode,true);
+        thread R_get_armor(&find_armour::get_armor,&R_find_armour,ref(R_frame),ref(R_dst),mode,false);
+        L_get_armor.join();
+        R_get_armor.join();
+//        //顺序识别左右图像
+//        L_find_armour.get_armor(L_frame,L_dst,mode,true);
+//        R_find_armour.get_armor(R_frame,R_dst,mode,false);
+//        cout<<"Time_Process:"<<time.elapsed()<<"ms"<<endl;
+
 
         Left_Points = L_find_armour.ArmorPoints;
         Right_Points = R_find_armour.ArmorPoints;
@@ -332,9 +326,9 @@ int main()
         sprintf(screen_data,"dis:%fm",A_Predict.Vision.dis.f/1000);
         putText(L_frame,screen_data,Point(100,100),1,5,Scalar(255,255,255));
         imshow("LEFT_img",L_frame);
-//        imshow("LEFT_dst",L_dst);
+        imshow("LEFT_dst",L_dst);
         imshow("RIGHT_img",R_frame);
-//        imshow("RIGHT_dst",R_dst);
+        imshow("RIGHT_dst",R_dst);
 #endif
 #ifdef OPEN_SERIAL
         sp.TransformData(A_Predict.Vision);

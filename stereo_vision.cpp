@@ -51,15 +51,15 @@ void stereo_vision::get_location(vector<Point2f> &Left_Points, vector<Point2f> &
     };
 //    sort(Left_Points.begin(),Left_Points.end(),sort_point);
 //    sort(Right_Points.begin(),Right_Points.end(),sort_point);
-    for(size_t i=0;i<Left_Points.size();i++){
-        cout<<"Left_Points:"<<Left_Points[i].y<<" "<<Right_Points[i].y<<endl;
-    }
+//    for(size_t i=0;i<Left_Points.size();i++){
+//        cout<<"Left_Points:"<<Left_Points[i].y<<" "<<Right_Points[i].y<<endl;
+//    }
     vector<Point2f> left_distort_points,Right_distort_points;
     undistortPoints(Left_Points,left_distort_points,cameraMatrixL,distCoeffL,Rl,Pl);
     undistortPoints(Right_Points,Right_distort_points,cameraMatrixR,distCoeffR,Rr,Pr);
-    for(size_t i=0;i<Left_Points.size();i++){
-        cout<<"left_distort_points:"<<left_distort_points[i].y<<" "<<Right_distort_points[i].y<<endl;
-    }
+//    for(size_t i=0;i<Left_Points.size();i++){
+//        cout<<"left_distort_points:"<<left_distort_points[i].y<<" "<<Right_distort_points[i].y<<endl;
+//    }
     for(i=0;i<Left_Points.size();i++)
     {
 //        cout<<"in"<<endl;

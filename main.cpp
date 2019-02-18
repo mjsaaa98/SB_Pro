@@ -23,9 +23,9 @@ int main()
     int fd2 = open("/dev/video1",O_RDWR);
     v4l2_set vs1(fd1),vs2(fd2);
     vs1.set_saturation(128);      //饱和度
-    vs1.set_exposure(22);     //曝光
+    vs1.set_exposure(23);     //曝光
     vs2.set_saturation(128);      //饱和度
-    vs2.set_exposure(22);     //曝光
+    vs2.set_exposure(23);     //曝光
 //    vs1.set_contrast(64);
 //    vs2.set_contrast(32);
     int camnum1 = vs1.set_camnum();
@@ -106,7 +106,8 @@ int main()
     }
     while(1)
     {
-
+//        QTime time;
+//        time.start();
         std::thread L_read(Read_Img,ref(cap_left),ref(L_frame));
         std::thread R_read(Read_Img,ref(cap_right),ref(R_frame));
         L_read.join();
@@ -114,8 +115,6 @@ int main()
 //#ifdef OPEN_SERIAL
 //        sp.get_Mode(mode);
 //#endif
-//        QTime time;
-//        time.start();
         Mat L_dst,R_dst;
         //用两个线程识别左右图像
         thread L_get_armor(&find_armour::get_armor,&L_find_armour,ref(L_frame),ref(L_dst),mode,true);
@@ -125,7 +124,6 @@ int main()
 //        //顺序识别左右图像
 //        L_find_armour.get_armor(L_frame,L_dst,mode,true);
 //        R_find_armour.get_armor(R_frame,R_dst,mode,false);
-//        cout<<"Time_Process:"<<time.elapsed()<<"ms"<<endl;
 
 
         Left_Points = L_find_armour.ArmorPoints;
@@ -135,8 +133,6 @@ int main()
 
         size_t Left_size = Left_Points.size();
         size_t Right_size = Right_Points.size();
-
-//        cout<<"Size:::::::::::::::::::::::::::"<<Left_size<<" "<<Right_size<<endl;
 #ifdef PRINT
         cout<<"Left_size&Right_size:"<<Left_size<<"    "<<Right_size<<endl;
         for(size_t i=0;i<Left_Points.size();i++){
@@ -152,7 +148,6 @@ int main()
         if(Left_size == 0 || Right_size == 0){
             memset(&A_Predict.Vision,0,sizeof(VisionData));
         }else{
-
 
 #ifdef SHOW_DEBUG
             for(int i =0 ;i < Left_size;i++)
@@ -184,6 +179,33 @@ int main()
                 L_find_armour.isROIflag = 1;
                 R_find_armour.isROIflag = 1;
             }
+#ifdef SHOW_DEBUG
+        char screen_data[100];
+        sprintf(screen_data,"dis:%fm",A_Predict.Vision.dis.f/1000);
+        putText(L_frame,screen_data,Point(100,100),1,5,Scalar(255,255,255));
+        imshow("LEFT_img",L_frame);
+        imshow("LEFT_dst",L_dst);
+        imshow("RIGHT_img",R_frame);
+        imshow("RIGHT_dst",R_dst);
+#endif
+#ifdef OPEN_SERIAL
+        sp.TransformData(A_Predict.Vision);
+#endif
+#ifdef SHOW_DEBUG
+        int i = waitKey(0);
+        if( i=='q') break;
+
+#endif
+    }
+//    else
+//    {
+//        cout<<"shexiangtou de shunxu youwu!!"<<endl;
+//    }
+    camera1.release();
+    camera2.release();
+    return 0;
+}
+//            cout<<"Time_Process:"<<time.elapsed()<<"ms"<<endl;
 //            else if(Left_size>Right_size)
 //            {
 //                cout<<"左边点多，开始选点！"<<endl;
@@ -321,28 +343,4 @@ int main()
 
 //                cout<<"time:"<<(t3-t1)/getTickFrequency()*1000<<endl;
 
-#ifdef SHOW_DEBUG
-        char screen_data[100];
-        sprintf(screen_data,"dis:%fm",A_Predict.Vision.dis.f/1000);
-        putText(L_frame,screen_data,Point(100,100),1,5,Scalar(255,255,255));
-        imshow("LEFT_img",L_frame);
-        imshow("LEFT_dst",L_dst);
-        imshow("RIGHT_img",R_frame);
-        imshow("RIGHT_dst",R_dst);
-#endif
-#ifdef OPEN_SERIAL
-        sp.TransformData(A_Predict.Vision);
-#endif
-#ifdef SHOW_DEBUG
-        int i = waitKey(1);
-        if( i=='q') break;
-#endif
-    }
-//    else
-//    {
-//        cout<<"shexiangtou de shunxu youwu!!"<<endl;
-//    }
-    camera1.release();
-    camera2.release();
-    return 0;
-}
+

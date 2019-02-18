@@ -145,17 +145,18 @@ void find_armour::image_preprocess(int mode,Mat src,Mat &dst)
         //    蓝色通道减去红色通道
         Mat gray;
         vector <Mat> planne;
-        Mat k = getStructuringElement(MORPH_RECT,Size(11,11));
-        Mat k1 = getStructuringElement(MORPH_RECT,Size(7,7));
-
+        Mat k = getStructuringElement(MORPH_RECT,Size(7,7));
+        Mat k1 = getStructuringElement(MORPH_RECT,Size(5,5));
+//        Mat k = getStructuringElement(MORPH_RECT,Size(11,11));
+//        Mat k1 = getStructuringElement(MORPH_RECT,Size(7,7));
         split(src,planne);
-        cvtColor(src,gray,CV_BGR2GRAY);
-        threshold(gray,gray,50,255,THRESH_BINARY);
+//        cvtColor(src,gray,CV_BGR2GRAY);
+        threshold(planne[1],gray,100,255,THRESH_BINARY);
 //        dilate(gray,gray,k);
 
         subtract(planne[0],planne[2],dst);
 
-        threshold(dst,dst,50,255,THRESH_BINARY);
+        threshold(dst,dst,100,255,THRESH_BINARY);
         dilate(dst,dst,k);
         dst = dst&gray;
         dilate(dst,dst,k1);
@@ -329,7 +330,6 @@ void find_armour::src_get_armor(Mat &img)
     float y_dist,x_dist,min_h,height_d,K,x2h_rate,/*angle_diff,*/max_h;
     float angle_of_Rotated,height_of_Rotated;
     if(size==2){
-//        cout<<"contours is 2"<<endl;
         height1 = contours_para[0][0];
         x1 = contours_para[0][1];
         y1 = contours_para[0][2];
@@ -360,7 +360,7 @@ void find_armour::src_get_armor(Mat &img)
         center_point2 = result_armor[1].center;
         area2 = result_armor[1].size.height * result_armor[1].size.width;
 
-//        float angle_d = fabs(angle2-angle1);
+        float angle_d = fabs(angle2-angle1);
         y_dist = fabs(y2-y1);
         x_dist = x2-x1;
         min_h = min(height1,height2);
@@ -396,11 +396,14 @@ void find_armour::src_get_armor(Mat &img)
 //            cout<<"angle::"<<angle1<<" "<<angle2<<endl;
 //            cout<<"dh_rate::"<<dh_rate<<endl;
             Point center=Point2f((x1+x2)*0.5,(y1+y2)*0.5);
-            if(y_dist<=0.4*(height1+height2)&&((x2h_rate>=0.5&&x2h_rate<=2.5)||(x2h_rate>=3.5&&x2h_rate<4.5))&&area_rate<2)
+            if(y_dist<=0.4*(height1+height2)&&(x2h_rate>=0.5&&x2h_rate<4.5)&&area_rate<2)
             {
 #ifdef CAFFE_BIN
                 Mat Roi = roi2bin(img,center,d,height_of_Rotated);
                 isArmor = Armor_Bin(Roi.clone());
+                cout<<"===============2====================="<<endl;
+                cout<<"isArmor:"<<isArmor<<" "<<"angle_d:"<<angle_d<<" "<<"x2h_rate"<<x2h_rate
+                   <<" "<<"y_dist:"<<y_dist<<" "<<0.4*(height1+height2)<<endl;
 #endif  //CAFFE_BIN
                 if(isArmor==1){
                     Armordata pushdata;
@@ -421,7 +424,6 @@ void find_armour::src_get_armor(Mat &img)
         }
     }
     else if(size>=3){
-        cout<<"多！"<<endl;
         for(int i=0;i<size-1;i++)
         {
             height1 = contours_para[i][0];
@@ -456,7 +458,7 @@ void find_armour::src_get_armor(Mat &img)
                 center_point2 = result_armor[j].center;
                 area2 = result_armor[j].size.height * result_armor[j].size.width;
 
-//                float angle_d = fabs(angle2-angle1);
+                float angle_d = fabs(angle2-angle1);
                 y_dist = fabs(y2-y1);
                 x_dist = x2-x1;
                 min_h = min(height1,height2);
@@ -511,6 +513,9 @@ void find_armour::src_get_armor(Mat &img)
 #ifdef CAFFE_BIN
                             Mat Roi = roi2bin(img,center,d,height_of_Rotated);
                             isArmor = Armor_Bin(Roi.clone());
+                            cout<<"===============ROI+"<<size<<"====================="<<endl;
+                            cout<<"isArmor:"<<isArmor<<" "<<"angle_d:"<<angle_d<<" "<<"x2h_rate"<<x2h_rate
+                               <<" "<<"y_dist:"<<y_dist<<" "<<0.4*(height1+height2)<<endl;
 #endif   //CAFFE_BIN
                             if(isArmor==1)
                             {
@@ -532,11 +537,15 @@ void find_armour::src_get_armor(Mat &img)
                     }
                     else
                     {//size>3+截图
-                        if(y_dist<=0.4*(height1+height2)&&((x2h_rate>=0.5&&x2h_rate<=2.5)||(x2h_rate>=3.5&&x2h_rate<4.5))&&area_rate<2)
+                        if(y_dist<=0.4*(height1+height2)&&fabs(K)<0.5&&angle_of_Rotated<20
+                                &&(x2h_rate>=0.5&&x2h_rate<4.5)&&area_rate<2)
                         {
 #ifdef CAFFE_BIN
                             Mat Roi = roi2bin(img,center,d,height_of_Rotated);
                             isArmor = Armor_Bin(Roi.clone());
+                            cout<<"===============NOT_ROI+"<<size<<"====================="<<endl;
+                            cout<<"isArmor:"<<isArmor<<" "<<"angle_d:"<<angle_d<<" "<<"x2h_rate"<<x2h_rate
+                               <<" "<<"y_dist:"<<y_dist<<" "<<0.4*(height1+height2)<<endl;
 #endif   //CAFFE_BIN
                             if(isArmor==1)
                             {
@@ -550,25 +559,6 @@ void find_armour::src_get_armor(Mat &img)
                                 ArmorPoints.push_back(center);
                                 if(x2h_rate>3.5)
                                 {// big_armor
-                                    pushdata.armor = big_armor;
-                                }
-                                Armordatas.push_back(pushdata);
-                            }
-                        }
-                        else if(y_dist<0.45*(height1+height2)
-                               &&fabs(K)<0.5&&angle_of_Rotated<20&&area_rate<3.5&&x2h_rate>=0.8&&x2h_rate<=4.5&&dh_rate<5&&height_d<0.5*max_h)
-                        {
-                            if(isArmor==1){
-                                Armordata pushdata;
-                                pushdata.armor_points[0] = pt[0];
-                                pushdata.armor_points[1] = pt[1];
-                                pushdata.armor_points[2] = pt[2];
-                                pushdata.armor_points[3] = pt[3];
-                                pushdata.diameter = d;
-                                pushdata.armor_center = center;
-                                ArmorPoints.push_back(center);
-                                if(x2h_rate>3.5)
-                                {
                                     pushdata.armor = big_armor;
                                 }
                                 Armordatas.push_back(pushdata);
